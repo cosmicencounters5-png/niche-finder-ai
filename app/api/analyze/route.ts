@@ -14,7 +14,9 @@ export async function POST(req: Request) {
     const deep = body.deep;
     const niche = body.niche;
 
-    /* ---------- DEEP ORACLE ---------- */
+    /* ===============================
+       🔥 DEEP ORACLE (CLICK NICHES)
+    =============================== */
 
     if (deep) {
 
@@ -48,13 +50,13 @@ export async function POST(req: Request) {
           role:"user",
           content:`
 
-You are an elite market oracle.
+You are ORACLE MARKET GOD.
 
 Niche:
 
 ${niche}
 
-Real market signals:
+Live market signals:
 
 ${marketSignals.join("\n")}
 
@@ -80,9 +82,11 @@ Return STRICT JSON ONLY:
 
     }
 
-    /* ---------- NORMAL MODE ---------- */
+    /* ===============================
+       🔥 ORACLE EVOLUTION X ENGINE
+    =============================== */
 
-    const subs = ["startups","Entrepreneur","sideproject"];
+    const subs = ["startups","Entrepreneur","sideproject","smallbusiness"];
 
     let titles:string[] = [];
 
@@ -110,34 +114,50 @@ Return STRICT JSON ONLY:
 
     const prompt = idea
       ? `
-You are Oracle Evolution X.
+You are ORACLE EVOLUTION X.
 
-Analyze the user's idea and predict real-world success.
+You DO NOT give generic advice.
+
+You identify EXACT profitable sub-niches and hot products.
 
 User idea:
 
 ${idea}
 
-Trending discussions:
+Live market discussions:
 
 ${titles.join("\n")}
+
+VERY IMPORTANT:
+
+Break down WHAT TO SELL specifically.
 
 Return STRICT JSON ONLY:
 
 {
  "mode":"idea",
+
  "name":"",
+
  "score":85,
 
  "success_probability":70,
  "time_to_first_sale":"7-14 days",
 
- "market_heat":"rising / stable / explosive",
- "buyer_intent":"low / medium / high",
+ "market_heat":"explosive",
+ "buyer_intent":"high",
 
  "why_trending":"",
  "pain_signal":"",
  "hidden_signal":"",
+
+ "hot_products":[
+   {
+     "name":"",
+     "why_hot":"",
+     "difficulty":"low/medium/high"
+   }
+ ],
 
  "execution":{
    "day1":"",
@@ -148,11 +168,14 @@ Return STRICT JSON ONLY:
  "monetization":"",
  "competition":""
 }
+
 `
       : `
-You are a niche radar AI.
+You are ORACLE TREND RADAR.
 
-Trending discussions:
+Find hidden niches from trending discussions.
+
+Trending:
 
 ${titles.join("\n")}
 
@@ -177,9 +200,7 @@ Return STRICT JSON ONLY:
     const completion = await openai.chat.completions.create({
 
       model:"gpt-4o-mini",
-
       response_format:{ type:"json_object" },
-
       messages:[{ role:"user", content:prompt }]
 
     });
