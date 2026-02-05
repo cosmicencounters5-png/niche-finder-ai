@@ -6,25 +6,25 @@ const openai = new OpenAI({
 
 export async function POST() {
 
-  /* -------- LIVE TREND SCAN -------- */
+  /* ---------- LIVE TREND SCAN ---------- */
 
-  const subreddits = [
+  const subs = [
     "startups",
     "Entrepreneur",
     "sideproject",
-    "saas",
+    "SaaS",
     "ChatGPT",
     "ArtificialInteligence"
   ];
 
   let titles:string[] = [];
 
-  for (const sub of subreddits) {
+  for (const sub of subs) {
 
     try {
 
       const res = await fetch(
-        `https://www.reddit.com/r/${sub}/hot.json?limit=8`
+        `https://www.reddit.com/r/${sub}/hot.json?limit=10`
       );
 
       const json = await res.json();
@@ -37,52 +37,57 @@ export async function POST() {
 
   }
 
-  /* -------- AI NICHE RADAR -------- */
+  /* ---------- AI ULTIMATE ENGINE ---------- */
 
   const completion = await openai.chat.completions.create({
 
     model: "gpt-4o-mini",
 
-    response_format: { type: "json_object" },
+    response_format:{ type:"json_object" },
 
-    messages: [
+    messages:[
 
       {
-        role: "system",
-        content: `
-You are an AI niche radar.
+        role:"system",
+        content:`
+You are an elite AI niche detection engine.
 
-Find emerging niches before mainstream.
+Detect emerging opportunities BEFORE mainstream.
 
-Avoid generic startup ideas.
+Score based on:
 
-Focus on:
+- trend velocity
+- unmet demand
+- competition saturation
+- monetization clarity
+- speed to build
 
-- emerging problems
-- new behaviours
-- underserved users
+Avoid generic ideas.
 `
       },
 
       {
-        role: "user",
-        content: `
+        role:"user",
+        content:`
 Trending discussions:
 
 ${titles.join("\n")}
 
-Return JSON:
+Return:
 
 {
  "niches":[
-  {
-   "name":"",
-   "why_trending":"",
-   "pain_signal":"",
-   "monetization":"",
-   "competition_level":"",
-   "speed_to_build":""
-  }
+   {
+    "name":"",
+    "score":0,
+    "confidence":"",
+    "why_trending":"",
+    "pain_signal":"",
+    "hidden_signal":"",
+    "competition":"",
+    "monetization":"",
+    "speed_to_build":""
+   }
  ]
 }
 `
