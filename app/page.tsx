@@ -10,31 +10,57 @@ export default function Home(){
   const [deepData,setDeepData]=useState<any>(null);
   const [selected,setSelected]=useState<number|null>(null);
 
+  /* ---------- ANALYZE IDEA ---------- */
+
   const analyze=async()=>{
 
+    if(!idea) return;
+
     setLoading(true);
+    setSelected(null);
+    setDeepData(null);
 
-    const res=await fetch("/api/analyze",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ idea })
-    });
+    try{
 
-    setData(await res.json());
+      const res=await fetch("/api/analyze",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ idea })
+      });
+
+      const json = await res.json();
+
+      console.log("ANALYZE RESULT:",json);
+
+      setData(json);
+
+    }catch(err){
+
+      console.log("analyze error",err);
+
+    }
+
     setLoading(false);
 
   };
+
+  /* ---------- RADAR ---------- */
 
   const radar=async()=>{
 
     setLoading(true);
+    setSelected(null);
+    setDeepData(null);
 
     const res=await fetch("/api/analyze",{ method:"POST" });
 
     setData(await res.json());
+
     setLoading(false);
 
   };
+
+  /* ---------- DEEP ORACLE ---------- */
 
   const deepScan=async(niche:string,index:number)=>{
 
@@ -86,6 +112,34 @@ export default function Home(){
         </button>
 
         {loading && <p>Scanning internet...</p>}
+
+        {/* ---------- IDEA RESULT ---------- */}
+
+        {(data?.mode==="idea" || data?.name) && (
+
+          <div className="bg-zinc-900 p-6 rounded-xl space-y-2">
+
+            <h2 className="text-xl font-semibold">
+              🔥 {data.name}
+            </h2>
+
+            <p>Score: {data.score}/100</p>
+
+            <p>{data.why_trending}</p>
+
+            <p><strong>Pain signal:</strong> {data.pain_signal}</p>
+
+            <p><strong>Hidden opportunity:</strong> {data.hidden_signal}</p>
+
+            <p><strong>Monetization:</strong> {data.monetization}</p>
+
+            <p><strong>Competition:</strong> {data.competition}</p>
+
+          </div>
+
+        )}
+
+        {/* ---------- RADAR RESULTS ---------- */}
 
         {data?.mode==="radar" && data.niches.map((n:any,i:number)=>(
 
