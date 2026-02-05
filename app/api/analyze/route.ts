@@ -15,30 +15,10 @@ export async function POST(req: Request) {
     const niche = body.niche;
 
     /* ===============================
-       ⚫ SHADOW DEEP ORACLE
+       🔥 DEEP ORACLE MODE
     =============================== */
 
-    if (deep) {
-
-      let marketSignals:string[] = [];
-
-      try {
-
-        const reddit = await fetch(
-          `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&limit=10`
-        );
-
-        const json = await reddit.json();
-
-        if (json?.data?.children) {
-
-          marketSignals = json.data.children.map(
-            (p:any)=>p.data.title
-          );
-
-        }
-
-      } catch {}
+    if(deep){
 
       const completion = await openai.chat.completions.create({
 
@@ -50,25 +30,22 @@ export async function POST(req: Request) {
           role:"user",
           content:`
 
-You are SHADOW ORACLE.
-
-Analyze deeper market strategy.
+You are SHADOW MONETIZATION ORACLE.
 
 Niche:
 
 ${niche}
 
-Live signals:
-
-${marketSignals.join("\n")}
-
-Return STRICT JSON ONLY:
+Return STRICT JSON:
 
 {
  "execution":"",
  "users":"",
  "traffic":"",
  "monetization":"",
+ "first_product":"",
+ "price":"",
+ "where_to_sell":"",
  "hidden_angle":"",
  "risk":""
 }
@@ -85,79 +62,34 @@ Return STRICT JSON ONLY:
     }
 
     /* ===============================
-       ⚫ ORACLE EVOLUTION X CORE
+       🔥 ORACLE EVOLUTION X + MONEY ENGINE
     =============================== */
-
-    const subs = ["startups","Entrepreneur","sideproject","smallbusiness"];
-
-    let titles:string[] = [];
-
-    for(const sub of subs){
-
-      try{
-
-        const reddit = await fetch(
-          `https://www.reddit.com/r/${sub}/hot.json?limit=6`
-        );
-
-        const json = await reddit.json();
-
-        if(json?.data?.children){
-
-          titles.push(
-            ...json.data.children.map((p:any)=>p.data.title)
-          );
-
-        }
-
-      }catch{}
-
-    }
 
     const prompt = idea
       ? `
-You are ORACLE EVOLUTION X.
+You are SHADOW MONETIZATION ENGINE.
 
-You think like an elite market analyst.
+You do NOT give theory.
 
-You identify:
-
-- early-stage opportunities
-- hidden buyer signals
-- EXACT hot products to sell
-- realistic execution paths
+You output EXACT things to sell.
 
 User idea:
 
 ${idea}
 
-Live market discussions:
-
-${titles.join("\n")}
-
-Return STRICT JSON ONLY:
+Return STRICT JSON:
 
 {
  "mode":"idea",
 
  "name":"",
+ "score":85,
 
- "score":0,
+ "success_probability":70,
+ "time_to_first_sale":"7-14 days",
 
- "success_probability":0,
- "time_to_first_sale":"",
-
- "market_heat":"",
- "buyer_intent":"",
-
- "trend_trajectory":{
-   "30_days":"",
-   "90_days":""
- },
-
- "why_trending":"",
- "pain_signal":"",
- "hidden_signal":"",
+ "market_heat":"explosive",
+ "buyer_intent":"high",
 
  "hot_products":[
    {
@@ -166,6 +98,11 @@ Return STRICT JSON ONLY:
      "difficulty":"low/medium/high"
    }
  ],
+
+ "first_product":"",
+ "price":"",
+ "where_to_sell":"",
+ "traffic_source":"",
 
  "execution":{
    "day1":"",
@@ -176,25 +113,18 @@ Return STRICT JSON ONLY:
  "monetization":"",
  "competition":""
 }
-
 `
       : `
-You are SHADOW TREND RADAR.
+You are Niche Radar AI.
 
-Detect emerging niches BEFORE mainstream adoption.
-
-Trending discussions:
-
-${titles.join("\n")}
-
-Return STRICT JSON ONLY:
+Return JSON:
 
 {
  "mode":"radar",
  "niches":[
   {
    "name":"",
-   "score":0,
+   "score":80,
    "why_trending":"",
    "pain_signal":"",
    "hidden_signal":"",
@@ -208,26 +138,18 @@ Return STRICT JSON ONLY:
     const completion = await openai.chat.completions.create({
 
       model:"gpt-4o-mini",
-
       response_format:{ type:"json_object" },
-
       messages:[{ role:"user", content:prompt }]
 
     });
 
-    const content = completion.choices[0].message.content;
-
-    if(!content){
-
-      return Response.json({ error:"empty oracle response" });
-
-    }
-
-    return Response.json(JSON.parse(content));
+    return Response.json(
+      JSON.parse(completion.choices[0].message.content!)
+    );
 
   } catch(err){
 
-    console.log("ORACLE ERROR:", err);
+    console.log("SHADOW ENGINE ERROR:", err);
 
     return Response.json({
       error:"oracle failed"
