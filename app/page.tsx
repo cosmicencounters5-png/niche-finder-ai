@@ -7,39 +7,6 @@ export default function Home(){
   const [idea,setIdea]=useState("");
   const [loading,setLoading]=useState(false);
   const [data,setData]=useState<any>(null);
-  const [deepData,setDeepData]=useState<any>(null);
-  const [selected,setSelected]=useState<number|null>(null);
-
-  const [scanStep,setScanStep]=useState("");
-  const [showReveal,setShowReveal]=useState(false);
-  const [unlock,setUnlock]=useState(false);
-
-  const scanMessages=[
-    "Scanning Reddit signals...",
-    "Tracking buyer intent...",
-    "Mapping competition gaps...",
-    "Detecting hidden demand...",
-    "Shadow engine computing probability..."
-  ];
-
-  const runScanAnimation=()=>{
-
-    let i=0;
-
-    const interval=setInterval(()=>{
-
-      setScanStep(scanMessages[i]);
-      i++;
-
-      if(i>=scanMessages.length){
-        clearInterval(interval);
-      }
-
-    },700);
-
-  };
-
-  /* ---------- ANALYZE IDEA ---------- */
 
   const analyze=async()=>{
 
@@ -47,12 +14,6 @@ export default function Home(){
 
     setLoading(true);
     setData(null);
-    setUnlock(false);
-    setSelected(null);
-    setDeepData(null);
-    setShowReveal(false);
-
-    runScanAnimation();
 
     const res=await fetch("/api/analyze",{
       method:"POST",
@@ -61,55 +22,7 @@ export default function Home(){
     });
 
     setData(await res.json());
-
-    setTimeout(()=>{
-      setLoading(false);
-      setShowReveal(true);
-    },800);
-
-  };
-
-  /* ---------- RADAR MODE ---------- */
-
-  const radar=async()=>{
-
-    setLoading(true);
-    setData(null);
-    setSelected(null);
-    setDeepData(null);
-    setShowReveal(false);
-
-    runScanAnimation();
-
-    const res=await fetch("/api/analyze",{ method:"POST" });
-
-    setData(await res.json());
-
-    setTimeout(()=>{
-      setLoading(false);
-      setShowReveal(true);
-    },800);
-
-  };
-
-  /* ---------- DEEP ORACLE ---------- */
-
-  const deepScan=async(niche:string,index:number)=>{
-
-    setSelected(index);
-    setDeepData(null);
-
-    const res=await fetch("/api/analyze",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        deep:true,
-        niche
-      })
-    });
-
-    setDeepData(await res.json());
-
+    setLoading(false);
   };
 
   return(
@@ -119,7 +32,7 @@ export default function Home(){
       <div className="max-w-xl w-full space-y-6">
 
         <h1 className="text-3xl font-bold text-center">
-          ⚫ Oracle Evolution X
+          ⚫ Shadow Monetization Engine
         </h1>
 
         <textarea
@@ -136,22 +49,15 @@ export default function Home(){
           Analyze Idea
         </button>
 
-        <button
-          onClick={radar}
-          className="w-full border py-3 rounded-lg"
-        >
-          Scan Emerging Niches
-        </button>
-
         {loading && (
-          <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse">
-            ⚫ {scanStep || "Initializing shadow engine..."}
+          <div className="bg-zinc-900 p-6 rounded-xl animate-pulse text-sm">
+            ⚫ Shadow engine calculating fastest money path...
           </div>
         )}
 
-        {/* ---------- IDEA RESULT ---------- */}
+        {/* RESULT */}
 
-        {(showReveal && data?.mode==="idea") && (
+        {data?.mode==="idea" && (
 
           <div className="bg-zinc-900 p-6 rounded-xl space-y-4">
 
@@ -161,97 +67,81 @@ export default function Home(){
 
             <p>Opportunity Score: {data.score}/100</p>
 
-            <p>🔥 Success Probability: {data.success_probability}%</p>
+            {/* SUCCESS BAR */}
 
-            {data.hot_products?.map((p:any,i:number)=>(
+            <div>
+              <p>🔥 Success Probability: {data.success_probability}%</p>
 
-              <div key={i} className="bg-zinc-800 p-3 rounded-lg text-sm">
-
-                <p className="font-semibold">{p.name}</p>
-                <p>{p.why_hot}</p>
-                <p className="opacity-60">Difficulty: {p.difficulty}</p>
-
+              <div className="w-full h-3 bg-zinc-800 rounded">
+                <div
+                  className="h-3 bg-green-500 rounded transition-all duration-700"
+                  style={{ width:`${data.success_probability}%` }}
+                />
               </div>
+            </div>
 
-            ))}
+            <p>Time to first sale: {data.time_to_first_sale}</p>
+            <p>Market heat: {data.market_heat}</p>
+            <p>Buyer intent: {data.buyer_intent}</p>
 
-            {!unlock && (
+            {/* 🔥 MONEY MACHINE SECTION */}
 
-              <div className="bg-zinc-800 p-6 rounded-xl text-center space-y-3">
+            <div className="border-t border-zinc-700 pt-4 space-y-2">
 
-                <p className="font-semibold">
-                  ⚫ Deep Oracle Intelligence Locked
-                </p>
+              <h3 className="font-semibold text-lg">
+                💰 First Money Blueprint
+              </h3>
 
-                <button
-                  onClick={()=>setUnlock(true)}
-                  className="bg-white text-black px-4 py-2 rounded-lg"
-                >
-                  Unlock Deep Oracle
-                </button>
+              <p><strong>First Product:</strong> {data.first_product}</p>
+              <p><strong>Suggested Price:</strong> {data.price}</p>
+              <p><strong>Where to Sell:</strong> {data.where_to_sell}</p>
+              <p><strong>Traffic Source:</strong> {data.traffic_source}</p>
+
+            </div>
+
+            {/* HOT PRODUCTS */}
+
+            {data.hot_products && (
+
+              <div className="border-t border-zinc-700 pt-4">
+
+                <h3 className="font-semibold mb-2">
+                  🔥 Hot Products Inside This Niche
+                </h3>
+
+                {data.hot_products.map((p:any,i:number)=>(
+
+                  <div key={i} className="mb-3">
+
+                    <p className="font-semibold">{p.name}</p>
+                    <p className="text-sm opacity-70">{p.why_hot}</p>
+                    <p className="text-xs opacity-50">Difficulty: {p.difficulty}</p>
+
+                  </div>
+
+                ))}
 
               </div>
 
             )}
 
-            {unlock && (
+            {/* EXECUTION */}
 
-              <div className="bg-zinc-800 p-4 rounded-lg text-sm space-y-1">
+            <div className="border-t border-zinc-700 pt-4">
 
-                <p><strong>Day 1:</strong> {data.execution?.day1}</p>
-                <p><strong>Week 1:</strong> {data.execution?.week1}</p>
-                <p><strong>First revenue:</strong> {data.execution?.first_revenue}</p>
+              <h3 className="font-semibold mb-2">
+                ⚡ Execution Plan
+              </h3>
 
-              </div>
+              <p>Day 1: {data.execution?.day1}</p>
+              <p>Week 1: {data.execution?.week1}</p>
+              <p>First Revenue: {data.execution?.first_revenue}</p>
 
-            )}
+            </div>
 
           </div>
 
         )}
-
-        {/* ---------- RADAR RESULTS ---------- */}
-
-        {(showReveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
-
-          <div
-            key={i}
-            onClick={()=>deepScan(n.name,i)}
-            className="bg-zinc-900 p-6 rounded-xl space-y-2 cursor-pointer hover:bg-zinc-800"
-          >
-
-            <h2>🔥 {n.name}</h2>
-
-            <p>Score: {n.score}/100</p>
-
-            <p>{n.why_trending}</p>
-
-            {selected===i && (
-
-              <div className="mt-4 border-t border-zinc-700 pt-4 space-y-2">
-
-                {!deepData && <p>⚫ Shadow Oracle diving deeper...</p>}
-
-                {deepData && (
-
-                  <>
-                    <p><strong>Execution:</strong> {deepData.execution}</p>
-                    <p><strong>Users:</strong> {deepData.users}</p>
-                    <p><strong>Traffic:</strong> {deepData.traffic}</p>
-                    <p><strong>Monetization:</strong> {deepData.monetization}</p>
-                    <p><strong>Hidden angle:</strong> {deepData.hidden_angle}</p>
-                    <p><strong>Risk:</strong> {deepData.risk}</p>
-                  </>
-
-                )}
-
-              </div>
-
-            )}
-
-          </div>
-
-        ))}
 
       </div>
 
