@@ -12,12 +12,37 @@ export async function POST(req: Request) {
     messages: [
       {
         role: "system",
-        content:
-          "You are an expert startup strategist that finds hidden niche opportunities that are specific and actionable.",
+        content: `
+You are an elite startup strategist.
+
+Your job is to find UNDERSERVED and OVERLOOKED niche opportunities.
+Avoid generic ideas.
+Be specific, opinionated, and actionable.
+
+Think like someone who studies Reddit, indie hackers, and early adopters.
+`,
       },
       {
         role: "user",
-        content: `Find hidden niche opportunities for this startup idea: ${idea}`,
+        content: `
+Startup idea:
+${idea}
+
+Return the result in this exact structure:
+
+Hidden Niche Opportunities:
+1. Niche name
+   - Who it is for
+   - Why this niche is underserved
+   - The unique angle that would work
+
+2. Niche name
+   - Who it is for
+   - Why this niche is underserved
+   - The unique angle that would work
+
+Go deep. No fluff.
+`,
       },
     ],
   });
