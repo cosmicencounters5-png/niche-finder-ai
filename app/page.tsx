@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 
 export default function Home() {
+
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
   const [dark, setDark] = useState(false);
@@ -20,69 +21,92 @@ export default function Home() {
 
   useEffect(() => {
     if (!data?.score) return;
+
     let n = 0;
+
     const i = setInterval(() => {
       n++;
       setDisplayScore(n);
+
       if (n >= data.score) clearInterval(i);
+
     }, 20);
+
     return () => clearInterval(i);
+
   }, [data]);
 
   const analyze = async () => {
+
     setLoading(true);
+
     const res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idea }),
     });
+
     setData(await res.json());
+
     setLoading(false);
+
   };
 
-  const download = () => {
-    const text = `
-BUSINESS LAUNCH BRIEF
+  /* ---------------- PDF DOWNLOAD ---------------- */
 
-Idea:
-${idea}
+  const downloadPDF = () => {
 
-Verdict:
-${data.verdict}
+    if (!data) return;
 
-Score:
-${data.score}/100
+    const doc = new jsPDF();
 
-Refined Idea:
-${data.refined_idea}
+    let y = 10;
 
-Target Customer:
-${data.ideal_customer.who}
+    const add = (text: string) => {
+      doc.text(text, 10, y);
+      y += 8;
+    };
 
-Execution:
-Day 1: ${data.execution.day1}
-Week 1: ${data.execution.week1}
-First Revenue: ${data.execution.first_revenue}
+    add("AI Founder Launch Report");
+    add("---------------------------");
 
-Launch Plan:
-MVP: ${data.launch_plan.mvp}
-Traffic: ${data.launch_plan.traffic}
-Monetization: ${data.launch_plan.monetization}
-Next 72h: ${data.launch_plan.next_72_hours}
+    add("Idea:");
+    add(idea);
 
-Risks:
-${data.red_flags.join("\n")}
-`;
+    add("");
+    add("Verdict: " + data.verdict);
+    add("Score: " + data.score + "/100");
 
-    const blob = new Blob([text], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "launch-plan.txt";
-    a.click();
+    add("");
+    add("Refined Idea:");
+    add(data.refined_idea);
+
+    add("");
+    add("Target Customer:");
+    add(data.ideal_customer?.who || "");
+
+    add("");
+    add("Execution:");
+    add("Day 1: " + data.execution?.day1);
+    add("Week 1: " + data.execution?.week1);
+    add("First Revenue: " + data.execution?.first_revenue);
+
+    add("");
+    add("Launch Plan:");
+    add("MVP: " + data.launch_plan?.mvp);
+    add("Traffic: " + data.launch_plan?.traffic);
+    add("Monetization: " + data.launch_plan?.monetization);
+
+    doc.save("AI-launch-plan.pdf");
+
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
+
     <main className="min-h-screen bg-gray-100 dark:bg-black px-4 py-10 flex justify-center">
+
       <div className="max-w-xl w-full space-y-6 text-black dark:text-white">
 
         <textarea
@@ -103,20 +127,31 @@ ${data.red_flags.join("\n")}
         {data && (
           <>
             <div className="text-center">
-              <p className="text-5xl font-bold">{displayScore}/100</p>
-              <p className="opacity-60">{data.verdict}</p>
+
+              <p className="text-5xl font-bold">
+                {displayScore}/100
+              </p>
+
+              <p className="opacity-60">
+                {data.verdict}
+              </p>
+
             </div>
 
             <button
-  onClick={() => window.print()}
-  className="w-full border py-3 rounded-lg"
->
-  📄 Save as PDF
-</button>
+              onClick={downloadPDF}
+              className="w-full border py-3 rounded-lg"
+            >
+              📄 Download Launch Plan (PDF)
+            </button>
+
           </>
         )}
 
       </div>
+
     </main>
+
   );
+
 }
