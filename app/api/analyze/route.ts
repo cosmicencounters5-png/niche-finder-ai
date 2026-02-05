@@ -12,9 +12,23 @@ export async function POST(req:Request){
   const deep = body.deep;
   const niche = body.niche;
 
-  /* ---------- DEEP INTELLIGENCE MODE ---------- */
+  /* ---------- ORACLE DEEP MODE ---------- */
 
   if(deep){
+
+    let marketSignals:string[]=[];
+
+    try{
+
+      const res = await fetch(
+        `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&limit=12`
+      );
+
+      const json = await res.json();
+
+      marketSignals = json.data.children.map((p:any)=>p.data.title);
+
+    }catch{}
 
     const completion = await openai.chat.completions.create({
 
@@ -31,7 +45,11 @@ Niche:
 
 ${niche}
 
-Generate deep execution intelligence.
+REAL MARKET DISCUSSIONS:
+
+${marketSignals.join("\n")}
+
+Analyze like an elite startup strategist.
 
 Return:
 
@@ -41,8 +59,10 @@ Return:
  "traffic":"",
  "monetization":"",
  "hidden_angle":"",
- "risk":""
+ "risk":"",
+ "real_market_signals":[]
 }
+
 `
       }]
 
