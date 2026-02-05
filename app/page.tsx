@@ -54,9 +54,10 @@ export default function Home() {
       </button>
 
       {result && (
-className="mt-8 p-4 border rounded-lg max-w-xl whitespace-pre-wrap text-left"
-  ref={(el) => el?.scrollIntoView({ behavior: "smooth" })}
->          {result}
+        <div
+          className="mt-8 p-4 border rounded-lg max-w-xl whitespace-pre-wrap text-left"
+        >
+          {result}
         </div>
       )}
 
