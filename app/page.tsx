@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home(){
 
@@ -12,8 +12,6 @@ export default function Home(){
 
   const [scanStep,setScanStep]=useState("");
   const [showReveal,setShowReveal]=useState(false);
-
-  /* ---------- WAR MODE SCANNING ---------- */
 
   const scanMessages = [
     "Scanning Reddit signals...",
@@ -42,8 +40,6 @@ export default function Home(){
     },700);
 
   };
-
-  /* ---------- ANALYZE IDEA ---------- */
 
   const analyze=async()=>{
 
@@ -76,8 +72,6 @@ export default function Home(){
 
   };
 
-  /* ---------- RADAR ---------- */
-
   const radar=async()=>{
 
     setLoading(true);
@@ -99,8 +93,6 @@ export default function Home(){
     },800);
 
   };
-
-  /* ---------- DEEP ORACLE ---------- */
 
   const deepScan=async(niche:string,index:number)=>{
 
@@ -195,23 +187,55 @@ export default function Home(){
             {data.success_probability > 65 && (
 
               <div className="bg-green-900/30 p-3 rounded-lg text-sm">
-
                 ⚫ Shadow Signal detected — You are EARLY in this niche.
-
               </div>
 
             )}
 
-            <p>Time to first sale: {data.time_to_first_sale}</p>
+            {/* FUTURE TRAJECTORY */}
 
-            <p>Market heat: {data.market_heat}</p>
-            <p>Buyer intent: {data.buyer_intent}</p>
+            {data.trend_trajectory && (
+
+              <div className="bg-zinc-800 p-3 rounded-lg text-sm">
+
+                <p className="font-semibold mb-1">📈 Predicted trajectory</p>
+
+                <p>Next 30 days: {data.trend_trajectory["30_days"]}</p>
+                <p>Next 90 days: {data.trend_trajectory["90_days"]}</p>
+
+              </div>
+
+            )}
 
             <p>{data.why_trending}</p>
 
             <p><strong>Pain:</strong> {data.pain_signal}</p>
 
             <p><strong>Hidden opportunity:</strong> {data.hidden_signal}</p>
+
+            {/* HOT PRODUCTS */}
+
+            {data.hot_products?.length > 0 && (
+
+              <div className="space-y-3">
+
+                <p className="font-semibold">🔥 Hot products inside this niche</p>
+
+                {data.hot_products.map((p:any,i:number)=>(
+
+                  <div key={i} className="bg-zinc-800 p-3 rounded-lg text-sm">
+
+                    <p className="font-semibold">{p.name}</p>
+                    <p>{p.why_hot}</p>
+                    <p className="opacity-60">Difficulty: {p.difficulty}</p>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            )}
 
             <div className="border-t border-zinc-700 pt-3 space-y-1">
 
