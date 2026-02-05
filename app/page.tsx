@@ -107,11 +107,11 @@ ${data.red_flags.join("\n")}
             </div>
 
             <button
-              onClick={download}
-              className="w-full border py-3 rounded-lg"
-            >
-              ⬇️ Download Launch Plan
-            </button>
+  onClick={() => window.print()}
+  className="w-full border py-3 rounded-lg"
+>
+  📄 Save as PDF
+</button>
           </>
         )}
 
