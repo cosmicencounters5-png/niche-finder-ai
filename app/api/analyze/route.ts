@@ -4,73 +4,96 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export async function POST(req: Request) {
-  const { idea } = await req.json();
+export async function POST() {
 
-  const subs = ["startups", "Entrepreneur", "sideproject", "saas"];
-  let titles: string[] = [];
+  /* -------- LIVE TREND SCAN -------- */
 
-  for (const sub of subs) {
+  const subreddits = [
+    "startups",
+    "Entrepreneur",
+    "sideproject",
+    "saas",
+    "ChatGPT",
+    "ArtificialInteligence"
+  ];
+
+  let titles:string[] = [];
+
+  for (const sub of subreddits) {
+
     try {
-      const res = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=6`);
+
+      const res = await fetch(
+        `https://www.reddit.com/r/${sub}/hot.json?limit=8`
+      );
+
       const json = await res.json();
-      titles.push(...json.data.children.map((p: any) => p.data.title));
+
+      titles.push(
+        ...json.data.children.map((p:any)=>p.data.title)
+      );
+
     } catch {}
+
   }
 
+  /* -------- AI NICHE RADAR -------- */
+
   const completion = await openai.chat.completions.create({
+
     model: "gpt-4o-mini",
+
     response_format: { type: "json_object" },
+
     messages: [
+
       {
         role: "system",
-        content: "You are GOD MODE. Return only valid JSON."
+        content: `
+You are an AI niche radar.
+
+Find emerging niches before mainstream.
+
+Avoid generic startup ideas.
+
+Focus on:
+
+- emerging problems
+- new behaviours
+- underserved users
+`
       },
+
       {
         role: "user",
         content: `
-USER IDEA:
-${idea}
+Trending discussions:
 
-TREND SIGNALS:
 ${titles.join("\n")}
 
 Return JSON:
 
 {
-  "verdict": "",
-  "score": 0,
-  "refined_idea": "",
-  "ideal_customer": {
-    "who": "",
-    "where": "",
-    "trigger": ""
-  },
-  "best_opportunity": {
-    "niche": "",
-    "why_now": "",
-    "blindspot": ""
-  },
-  "execution": {
-    "day1": "",
-    "week1": "",
-    "first_revenue": ""
-  },
-  "launch_plan": {
-    "mvp": "",
-    "traffic": "",
-    "monetization": "",
-    "next_72_hours": ""
-  },
-  "red_flags": [],
-  "trend_signals": []
+ "niches":[
+  {
+   "name":"",
+   "why_trending":"",
+   "pain_signal":"",
+   "monetization":"",
+   "competition_level":"",
+   "speed_to_build":""
+  }
+ ]
 }
 `
       }
+
     ]
+
   });
 
   return Response.json(
     JSON.parse(completion.choices[0].message.content!)
   );
+
 }
