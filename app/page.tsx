@@ -50,46 +50,58 @@ export default function Home() {
   /* ---------------- SCORE ANIMATION ---------------- */
   useEffect(() => {
     if (score === null) return;
+
     let current = 0;
     const interval = setInterval(() => {
-      current += 2;
+      current += 1;
       setDisplayScore(current);
       if (current >= score) {
         setDisplayScore(score);
         clearInterval(interval);
       }
-    }, 15);
+    }, 25); // 👈 langsommere
+
     return () => clearInterval(interval);
   }, [score]);
 
-  /* ---------------- TYPING: MISS ---------------- */
+  /* ---------------- TYPING: MISS (SEKVENSIELL) ---------------- */
   useEffect(() => {
-    if (!miss) return;
-    let i = 0;
-    setTypedMiss("");
-    const interval = setInterval(() => {
-      setTypedMiss((prev) => prev + miss[i]);
-      i++;
-      if (i >= miss.length) clearInterval(interval);
-    }, 12);
-    return () => clearInterval(interval);
-  }, [miss]);
+    if (!miss || score === null) return;
 
-  /* ---------------- TYPING: ALTERNATIVES ---------------- */
+    // vent til score er ferdig + liten pause
+    const delay = setTimeout(() => {
+      let i = 0;
+      setTypedMiss("");
+
+      const interval = setInterval(() => {
+        setTypedMiss((prev) => prev + miss[i]);
+        i++;
+        if (i >= miss.length) clearInterval(interval);
+      }, 30); // 👈 tydelig typing
+
+    }, 800);
+
+    return () => clearTimeout(delay);
+  }, [miss, score]);
+
+  /* ---------------- TYPING: ALTERNATIVES (ETTER MISS) ---------------- */
   useEffect(() => {
-    if (alts.length === 0) return;
+    if (alts.length === 0 || typedMiss.length < miss.length) return;
 
-    setTypedAlts([]);
-    let index = 0;
+    const delay = setTimeout(() => {
+      let index = 0;
+      setTypedAlts([]);
 
-    const reveal = setInterval(() => {
-      setTypedAlts((prev) => [...prev, alts[index]]);
-      index++;
-      if (index >= alts.length) clearInterval(reveal);
-    }, 400);
+      const reveal = setInterval(() => {
+        setTypedAlts((prev) => [...prev, alts[index]]);
+        index++;
+        if (index >= alts.length) clearInterval(reveal);
+      }, 600); // 👈 én og én
 
-    return () => clearInterval(reveal);
-  }, [alts]);
+    }, 600);
+
+    return () => clearTimeout(delay);
+  }, [alts, typedMiss]);
 
   /* ---------------- AI CALL ---------------- */
   const analyzeIdea = async () => {
@@ -212,7 +224,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* MISS (TYPING) */}
+        {/* MISS */}
         {typedMiss && (
           <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl">
             <h2 className="font-semibold mb-2">⚠️ Most founders miss this</h2>
@@ -220,7 +232,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* ALTERNATIVES (LIVE REVEAL) */}
+        {/* ALTERNATIVES */}
         {typedAlts.length > 0 && (
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl">
             <h2 className="font-semibold mb-3">🔁 Alternative Opportunities</h2>
