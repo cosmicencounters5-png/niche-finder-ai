@@ -6,12 +6,14 @@ export default function Home() {
   const [idea, setIdea] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [score, setScore] = useState<string | null>(null);
 
   const analyzeIdea = async () => {
     if (!idea) return;
 
     setLoading(true);
     setResult("");
+    setScore(null);
 
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -23,7 +25,15 @@ export default function Home() {
 
     const data = await res.json();
 
-    setResult(data.result);
+    const text = data.result;
+
+    // Extract score from AI response
+    const match = text.match(/Hidden Niche Score:\s*(\d+)/i);
+    if (match) {
+      setScore(match[1]);
+    }
+
+    setResult(text);
     setLoading(false);
   };
 
@@ -56,6 +66,12 @@ export default function Home() {
       >
         {loading ? "Analyzing..." : "Find Hidden Niches"}
       </button>
+
+      {score && (
+        <div className="text-5xl font-bold mb-4">
+          {score}/100
+        </div>
+      )}
 
       {result && (
         <>
