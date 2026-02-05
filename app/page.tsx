@@ -32,13 +32,13 @@ export default function Home() {
     const scoreMatch = result.match(/Hidden Niche Score:\s*(\d+)/i);
     if (scoreMatch) setScore(scoreMatch[1]);
 
-    const bestMatch = result.match(/Best Opportunity:(.*?)(Most founders miss this:|Alternative Opportunities:)/s);
+    const bestMatch = result.match(/Best Opportunity:([\s\S]*?)(Most founders miss this:|Alternative Opportunities:)/);
     if (bestMatch) setBest(bestMatch[1].trim());
 
-    const missMatch = result.match(/Most founders miss this:(.*?)(Alternative Opportunities:)/s);
+    const missMatch = result.match(/Most founders miss this:([\s\S]*?)(Alternative Opportunities:)/);
     if (missMatch) setMiss(missMatch[1].trim());
 
-    const altMatch = result.match(/Alternative Opportunities:(.*)/s);
+    const altMatch = result.match(/Alternative Opportunities:([\s\S]*)/);
     if (altMatch) {
       const items = altMatch[1]
         .split("\n")
@@ -77,7 +77,6 @@ export default function Home() {
           {loading ? "Analyzing..." : "Find Hidden Niches"}
         </button>
 
-        {/* SCORE */}
         {score && (
           <div className="text-center mb-10">
             <div className="text-sm text-gray-500 mb-1">Hidden Niche Score</div>
@@ -85,7 +84,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* BEST OPPORTUNITY */}
         {best && (
           <div className="bg-white border rounded-xl p-6 mb-6">
             <h2 className="text-xl font-semibold mb-3">🔥 Best Opportunity</h2>
@@ -95,7 +93,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* WARNING */}
         {miss && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
             <h2 className="text-xl font-semibold mb-2">⚠️ Most founders miss this</h2>
@@ -103,7 +100,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* ALTERNATIVES */}
         {alternatives.length > 0 && (
           <div className="bg-white border rounded-xl p-6">
             <h2 className="text-xl font-semibold mb-4">🔁 Alternative Opportunities</h2>
