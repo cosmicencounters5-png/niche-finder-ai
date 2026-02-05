@@ -13,15 +13,17 @@ export default function Home(){
   const [scanStep,setScanStep]=useState("");
   const [reveal,setReveal]=useState(false);
 
-  /* ---------- ADDICTIVE SCAN FEED ---------- */
+  const [typedText,setTypedText]=useState("");
+
+  /* ---------- GOD MODE SCAN FEED ---------- */
 
   const scanMessages = [
-    "Scanning Reddit market signals...",
+    "Initializing shadow intelligence...",
+    "Scanning Reddit signals...",
     "Tracking buyer intent...",
-    "Analyzing hidden demand...",
     "Mapping competition gaps...",
     "Calculating monetization vectors...",
-    "Oracle intelligence activated..."
+    "Oracle ready..."
   ];
 
   const runScanAnimation = () => {
@@ -31,7 +33,6 @@ export default function Home(){
     const interval = setInterval(()=>{
 
       setScanStep(scanMessages[i]);
-
       i++;
 
       if(i >= scanMessages.length){
@@ -43,6 +44,30 @@ export default function Home(){
     },600);
 
   };
+
+  /* ---------- TYPEWRITER EFFECT ---------- */
+
+  useEffect(()=>{
+
+    if(!data?.name) return;
+
+    let i = 0;
+    setTypedText("");
+
+    const interval = setInterval(()=>{
+
+      setTypedText(prev => prev + data.name[i]);
+      i++;
+
+      if(i >= data.name.length){
+        clearInterval(interval);
+      }
+
+    },30);
+
+    return ()=>clearInterval(interval);
+
+  },[data]);
 
   /* ---------- ANALYZE IDEA ---------- */
 
@@ -70,7 +95,7 @@ export default function Home(){
     setTimeout(()=>{
       setReveal(true);
       setLoading(false);
-    },800);
+    },900);
 
   };
 
@@ -94,7 +119,7 @@ export default function Home(){
     setTimeout(()=>{
       setReveal(true);
       setLoading(false);
-    },800);
+    },900);
 
   };
 
@@ -123,12 +148,12 @@ export default function Home(){
 
       <div className="max-w-xl w-full space-y-6">
 
-        <h1 className="text-3xl font-bold text-center">
-          ⚫ Shadow Monetization Engine
+        <h1 className="text-3xl font-bold text-center tracking-wide">
+          ⚫ Shadow God Engine
         </h1>
 
         <textarea
-          className="w-full p-4 bg-zinc-900 rounded-lg"
+          className="w-full p-4 bg-zinc-900 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
           placeholder="Describe your business idea..."
           value={idea}
           onChange={(e)=>setIdea(e.target.value)}
@@ -136,56 +161,50 @@ export default function Home(){
 
         <button
           onClick={analyze}
-          className="w-full bg-white text-black py-3 rounded-lg"
+          className="w-full bg-white text-black py-3 rounded-lg hover:scale-[1.02] transition"
         >
           Analyze Idea
         </button>
 
         <button
           onClick={radar}
-          className="w-full border py-3 rounded-lg"
+          className="w-full border py-3 rounded-lg hover:bg-zinc-900 transition"
         >
           Scan Emerging Niches
         </button>
 
-        {/* 🔥 LIVE SCANNING FEED */}
+        {/* LIVE SCAN */}
 
         {loading && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse">
+          <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse border border-green-500/20">
 
-            ⚫ {scanStep || "Initializing shadow intelligence..."}
+            ⚫ {scanStep}
 
           </div>
 
         )}
 
-        {/* ======================
-           IDEA RESULT
-        ====================== */}
+        {/* IDEA RESULT */}
 
         {(reveal && data?.mode==="idea") && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl space-y-4 animate-[fadeIn_0.6s_ease]">
+          <div className="bg-zinc-900 p-6 rounded-xl space-y-4 shadow-lg shadow-green-900/20">
 
-            <h2 className="text-xl font-semibold">
-              🔥 {data.name}
+            <h2 className="text-xl font-semibold text-green-400">
+              🔥 {typedText}
             </h2>
 
             <p>Opportunity Score: {data.score}/100</p>
 
-            {/* SUCCESS BAR */}
-
             <div>
 
-              <p className="mb-1">
-                🔥 Success Probability: {data.success_probability}%
-              </p>
+              <p>🔥 Success Probability: {data.success_probability}%</p>
 
-              <div className="w-full h-3 bg-zinc-800 rounded">
+              <div className="w-full h-3 bg-zinc-800 rounded overflow-hidden">
 
                 <div
-                  className="h-3 bg-green-500 rounded transition-all duration-700"
+                  className="h-3 bg-green-500 rounded transition-all duration-1000"
                   style={{ width:`${data.success_probability}%` }}
                 />
 
@@ -195,74 +214,42 @@ export default function Home(){
 
             {data.success_probability > 65 && (
 
-              <div className="bg-green-900/30 p-3 rounded-lg text-sm">
-                ⚫ EARLY SIGNAL DETECTED — market entry window open.
+              <div className="bg-green-900/30 p-3 rounded-lg text-sm animate-pulse">
+                ⚫ EARLY SIGNAL DETECTED — high probability entry window.
               </div>
 
             )}
 
             <p>Time to first sale: {data.time_to_first_sale}</p>
-            <p>Market heat: {data.market_heat}</p>
-            <p>Buyer intent: {data.buyer_intent}</p>
-
-            {/* MONEY MACHINE */}
 
             <div className="border-t border-zinc-700 pt-4 space-y-2">
 
-              <h3 className="font-semibold text-lg">
+              <h3 className="font-semibold text-lg text-green-400">
                 💰 First Money Blueprint
               </h3>
 
-              <p><strong>First Product:</strong> {data.first_product}</p>
+              <p><strong>Product:</strong> {data.first_product}</p>
               <p><strong>Price:</strong> {data.price}</p>
-              <p><strong>Where to sell:</strong> {data.where_to_sell}</p>
-              <p><strong>Traffic source:</strong> {data.traffic_source}</p>
+              <p><strong>Where:</strong> {data.where_to_sell}</p>
+              <p><strong>Traffic:</strong> {data.traffic_source}</p>
 
             </div>
-
-            {/* HOT PRODUCTS */}
-
-            {data.hot_products && (
-
-              <div className="border-t border-zinc-700 pt-4">
-
-                <h3 className="font-semibold mb-2">
-                  🔥 Hot Products
-                </h3>
-
-                {data.hot_products.map((p:any,i:number)=>(
-
-                  <div key={i} className="mb-3">
-
-                    <p className="font-semibold">{p.name}</p>
-                    <p className="text-sm opacity-70">{p.why_hot}</p>
-                    <p className="text-xs opacity-50">Difficulty: {p.difficulty}</p>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            )}
 
           </div>
 
         )}
 
-        {/* ======================
-           RADAR RESULT
-        ====================== */}
+        {/* RADAR */}
 
         {(reveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
 
           <div
             key={i}
             onClick={()=>deepScan(n.name,i)}
-            className="bg-zinc-900 p-6 rounded-xl space-y-2 cursor-pointer hover:bg-zinc-800 transition-all"
+            className="bg-zinc-900 p-6 rounded-xl cursor-pointer hover:scale-[1.01] transition"
           >
 
-            <h2>🔥 {n.name}</h2>
+            <h2 className="text-green-400">🔥 {n.name}</h2>
 
             <p>Score: {n.score}/100</p>
 
@@ -270,9 +257,9 @@ export default function Home(){
 
             {selected===i && (
 
-              <div className="mt-4 border-t border-zinc-700 pt-4 space-y-2">
+              <div className="mt-4 border-t border-zinc-700 pt-4">
 
-                {!deepData && <p>⚫ Shadow Oracle diving deeper...</p>}
+                {!deepData && <p>⚫ Oracle diving deeper...</p>}
 
                 {deepData && (
 
@@ -281,8 +268,6 @@ export default function Home(){
                     <p><strong>Users:</strong> {deepData.users}</p>
                     <p><strong>Traffic:</strong> {deepData.traffic}</p>
                     <p><strong>Monetization:</strong> {deepData.monetization}</p>
-                    <p><strong>Hidden angle:</strong> {deepData.hidden_angle}</p>
-                    <p><strong>Risk:</strong> {deepData.risk}</p>
                   </>
 
                 )}
