@@ -5,116 +5,100 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-
   const { idea } = await req.json();
 
-  /* ---------------- REDDIT TREND SCAN ---------------- */
-
-  const subreddits = [
-    "startups",
-    "Entrepreneur",
-    "sideproject",
-    "saas"
-  ];
-
+  /* ---------- TREND RADAR (REDDIT) ---------- */
+  const subreddits = ["startups", "Entrepreneur", "sideproject", "saas"];
   let titles: string[] = [];
 
   for (const sub of subreddits) {
-
     try {
-
-      const res = await fetch(
-        `https://www.reddit.com/r/${sub}/hot.json?limit=10`
-      );
-
+      const res = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=8`);
       const json = await res.json();
-
-      const extracted = json.data.children.map(
-        (p: any) => p.data.title
-      );
-
-      titles = [...titles, ...extracted];
-
-    } catch (e) {
-      console.log("Reddit fetch failed", e);
-    }
+      const extracted = json.data.children.map((p: any) => p.data.title);
+      titles.push(...extracted);
+    } catch {}
   }
 
-  /* ---------------- AI ENGINE ---------------- */
-
+  /* ---------- GOD MODE AI ---------- */
   const completion = await openai.chat.completions.create({
-
     model: "gpt-4o-mini",
-
     messages: [
-
       {
         role: "system",
         content: `
-You are an elite niche discovery AI.
+You are GOD MODE.
 
-You detect:
+You do not brainstorm.
+You decide.
 
-- emerging trends
-- hidden frustrations
-- monetizable gaps
-- underserved audiences.
+You combine:
+- live internet pain signals
+- market timing
+- execution realism
 
-Avoid generic startup advice.
-Be specific and bold.
+You are allowed to say:
+- "do not build this"
+- "this is a rare opportunity"
+- "this will fail for 90% of people"
+
+Be brutally honest.
+Avoid fluff.
 `
       },
-
       {
         role: "user",
         content: `
-User idea:
-
+USER IDEA:
 ${idea}
 
-Trending discussions from Reddit:
-
+LIVE TREND SIGNALS (Reddit):
 ${titles.join("\n")}
 
-STEP 1:
-Identify recurring pain signals from trends.
+TASK:
 
-STEP 2:
-Combine pain signals with user idea.
+1. Detect emerging pain clusters.
+2. Combine with the user idea.
+3. Decide if this is worth building.
 
 Return EXACT format:
 
+Verdict:
+(Build / Do NOT build)
+
 Hidden Niche Score: (1-100)
+
+Core Pain Cluster:
+- Description
+- Why it's getting worse now
 
 Best Opportunity:
 - Niche:
-- Who it targets:
+- Target user:
 - Why underserved:
-- Why this could realistically succeed:
-- Viral positioning angle:
+- Why NOW (timing):
+- Why competitors are blind:
 
-Live Trend Signals:
+Execution Blueprint:
+Step 1 (Day 1):
+Step 2 (Week 1):
+Step 3 (First revenue):
+
+Fastest Monetization Path:
+- Method
+- Price range
+- Why this works
+
+Red Flags (Read this carefully):
 - bullet list
 
-Most founders miss this:
-
-Alternative Opportunities:
-1.
-2.
-3.
-
-Autopilot Ideas:
-1.
-2.
+If Verdict is "Do NOT build", explain exactly why.
 `
       }
-
     ]
-
   });
 
   return Response.json({
     result: completion.choices[0].message.content
   });
-
 }
