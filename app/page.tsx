@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home(){
 
@@ -10,6 +10,40 @@ export default function Home(){
   const [deepData,setDeepData]=useState<any>(null);
   const [selected,setSelected]=useState<number|null>(null);
 
+  const [scanStep,setScanStep]=useState("");
+  const [reveal,setReveal]=useState(false);
+
+  /* ---------- ADDICTIVE SCAN FEED ---------- */
+
+  const scanMessages = [
+    "Scanning Reddit market signals...",
+    "Tracking buyer intent...",
+    "Analyzing hidden demand...",
+    "Mapping competition gaps...",
+    "Calculating monetization vectors...",
+    "Oracle intelligence activated..."
+  ];
+
+  const runScanAnimation = () => {
+
+    let i = 0;
+
+    const interval = setInterval(()=>{
+
+      setScanStep(scanMessages[i]);
+
+      i++;
+
+      if(i >= scanMessages.length){
+
+        clearInterval(interval);
+
+      }
+
+    },600);
+
+  };
+
   /* ---------- ANALYZE IDEA ---------- */
 
   const analyze=async()=>{
@@ -17,8 +51,11 @@ export default function Home(){
     if(!idea) return;
 
     setLoading(true);
+    setReveal(false);
     setData(null);
     setSelected(null);
+
+    runScanAnimation();
 
     const res=await fetch("/api/analyze",{
       method:"POST",
@@ -26,22 +63,39 @@ export default function Home(){
       body:JSON.stringify({ idea })
     });
 
-    setData(await res.json());
-    setLoading(false);
+    const json = await res.json();
+
+    setData(json);
+
+    setTimeout(()=>{
+      setReveal(true);
+      setLoading(false);
+    },800);
+
   };
 
-  /* ---------- SCAN RADAR ---------- */
+  /* ---------- RADAR ---------- */
 
   const radar=async()=>{
 
     setLoading(true);
+    setReveal(false);
     setData(null);
     setSelected(null);
 
+    runScanAnimation();
+
     const res=await fetch("/api/analyze",{ method:"POST" });
 
-    setData(await res.json());
-    setLoading(false);
+    const json = await res.json();
+
+    setData(json);
+
+    setTimeout(()=>{
+      setReveal(true);
+      setLoading(false);
+    },800);
+
   };
 
   /* ---------- DEEP ORACLE ---------- */
@@ -87,7 +141,6 @@ export default function Home(){
           Analyze Idea
         </button>
 
-        {/* ✅ SCAN KNAPP ER TILBAKE */}
         <button
           onClick={radar}
           className="w-full border py-3 rounded-lg"
@@ -95,19 +148,25 @@ export default function Home(){
           Scan Emerging Niches
         </button>
 
+        {/* 🔥 LIVE SCANNING FEED */}
+
         {loading && (
-          <div className="bg-zinc-900 p-6 rounded-xl animate-pulse text-sm">
-            ⚫ Shadow engine scanning live markets...
+
+          <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse">
+
+            ⚫ {scanStep || "Initializing shadow intelligence..."}
+
           </div>
+
         )}
 
         {/* ======================
            IDEA RESULT
         ====================== */}
 
-        {data?.mode==="idea" && (
+        {(reveal && data?.mode==="idea") && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl space-y-4">
+          <div className="bg-zinc-900 p-6 rounded-xl space-y-4 animate-[fadeIn_0.6s_ease]">
 
             <h2 className="text-xl font-semibold">
               🔥 {data.name}
@@ -115,25 +174,44 @@ export default function Home(){
 
             <p>Opportunity Score: {data.score}/100</p>
 
+            {/* SUCCESS BAR */}
+
             <div>
-              <p>🔥 Success Probability: {data.success_probability}%</p>
+
+              <p className="mb-1">
+                🔥 Success Probability: {data.success_probability}%
+              </p>
+
               <div className="w-full h-3 bg-zinc-800 rounded">
+
                 <div
-                  className="h-3 bg-green-500 rounded"
+                  className="h-3 bg-green-500 rounded transition-all duration-700"
                   style={{ width:`${data.success_probability}%` }}
                 />
+
               </div>
+
             </div>
+
+            {data.success_probability > 65 && (
+
+              <div className="bg-green-900/30 p-3 rounded-lg text-sm">
+                ⚫ EARLY SIGNAL DETECTED — market entry window open.
+              </div>
+
+            )}
 
             <p>Time to first sale: {data.time_to_first_sale}</p>
             <p>Market heat: {data.market_heat}</p>
             <p>Buyer intent: {data.buyer_intent}</p>
 
-            {/* MONEY SECTION */}
+            {/* MONEY MACHINE */}
 
             <div className="border-t border-zinc-700 pt-4 space-y-2">
 
-              <h3 className="font-semibold">💰 First Money Blueprint</h3>
+              <h3 className="font-semibold text-lg">
+                💰 First Money Blueprint
+              </h3>
 
               <p><strong>First Product:</strong> {data.first_product}</p>
               <p><strong>Price:</strong> {data.price}</p>
@@ -148,7 +226,9 @@ export default function Home(){
 
               <div className="border-t border-zinc-700 pt-4">
 
-                <h3 className="font-semibold">🔥 Hot Products</h3>
+                <h3 className="font-semibold mb-2">
+                  🔥 Hot Products
+                </h3>
 
                 {data.hot_products.map((p:any,i:number)=>(
 
@@ -174,12 +254,12 @@ export default function Home(){
            RADAR RESULT
         ====================== */}
 
-        {data?.mode==="radar" && data.niches.map((n:any,i:number)=>(
+        {(reveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
 
           <div
             key={i}
             onClick={()=>deepScan(n.name,i)}
-            className="bg-zinc-900 p-6 rounded-xl space-y-2 cursor-pointer hover:bg-zinc-800"
+            className="bg-zinc-900 p-6 rounded-xl space-y-2 cursor-pointer hover:bg-zinc-800 transition-all"
           >
 
             <h2>🔥 {n.name}</h2>
@@ -192,7 +272,7 @@ export default function Home(){
 
               <div className="mt-4 border-t border-zinc-700 pt-4 space-y-2">
 
-                {!deepData && <p>⚫ Deep oracle scanning...</p>}
+                {!deepData && <p>⚫ Shadow Oracle diving deeper...</p>}
 
                 {deepData && (
 
