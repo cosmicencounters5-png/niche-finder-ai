@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home(){
 
@@ -10,6 +10,39 @@ export default function Home(){
   const [deepData,setDeepData]=useState<any>(null);
   const [selected,setSelected]=useState<number|null>(null);
 
+  const [scanStep,setScanStep]=useState("");
+  const [showReveal,setShowReveal]=useState(false);
+
+  /* ---------- WAR MODE SCANNING ---------- */
+
+  const scanMessages = [
+    "Scanning Reddit signals...",
+    "Tracking buyer intent...",
+    "Mapping competition gaps...",
+    "Detecting hidden demand...",
+    "Shadow engine computing probability..."
+  ];
+
+  const runScanAnimation = () => {
+
+    let i = 0;
+
+    const interval = setInterval(()=>{
+
+      setScanStep(scanMessages[i]);
+
+      i++;
+
+      if(i >= scanMessages.length){
+
+        clearInterval(interval);
+
+      }
+
+    },700);
+
+  };
+
   /* ---------- ANALYZE IDEA ---------- */
 
   const analyze=async()=>{
@@ -17,8 +50,12 @@ export default function Home(){
     if(!idea) return;
 
     setLoading(true);
+    setShowReveal(false);
     setSelected(null);
     setDeepData(null);
+    setData(null);
+
+    runScanAnimation();
 
     const res=await fetch("/api/analyze",{
       method:"POST",
@@ -30,7 +67,12 @@ export default function Home(){
 
     setData(json);
 
-    setLoading(false);
+    setTimeout(()=>{
+
+      setShowReveal(true);
+      setLoading(false);
+
+    },800);
 
   };
 
@@ -39,14 +81,22 @@ export default function Home(){
   const radar=async()=>{
 
     setLoading(true);
+    setShowReveal(false);
     setSelected(null);
     setDeepData(null);
+
+    runScanAnimation();
 
     const res=await fetch("/api/analyze",{ method:"POST" });
 
     setData(await res.json());
 
-    setLoading(false);
+    setTimeout(()=>{
+
+      setLoading(false);
+      setShowReveal(true);
+
+    },800);
 
   };
 
@@ -77,12 +127,12 @@ export default function Home(){
       <div className="max-w-xl w-full space-y-6">
 
         <h1 className="text-3xl font-bold text-center">
-          🔥 Oracle Evolution X
+          ⚫ Oracle Evolution X
         </h1>
 
         <textarea
           className="w-full p-4 bg-zinc-900 rounded-lg"
-          placeholder="Enter your idea..."
+          placeholder="Describe your business idea..."
           value={idea}
           onChange={(e)=>setIdea(e.target.value)}
         />
@@ -101,11 +151,19 @@ export default function Home(){
           Scan Emerging Niches
         </button>
 
-        {loading && <p>Scanning internet...</p>}
+        {loading && (
+
+          <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse">
+
+            ⚫ {scanStep || "Initializing shadow engine..."}
+
+          </div>
+
+        )}
 
         {/* ---------- IDEA RESULT ---------- */}
 
-        {(data?.mode==="idea" || data?.name) && (
+        {(showReveal && (data?.mode==="idea" || data?.name)) && (
 
           <div className="bg-zinc-900 p-6 rounded-xl space-y-4">
 
@@ -115,7 +173,7 @@ export default function Home(){
 
             <p>Opportunity Score: {data.score}/100</p>
 
-            {/* SUCCESS PROBABILITY METER */}
+            {/* SUCCESS METER */}
 
             <div>
 
@@ -133,6 +191,16 @@ export default function Home(){
               </div>
 
             </div>
+
+            {data.success_probability > 65 && (
+
+              <div className="bg-green-900/30 p-3 rounded-lg text-sm">
+
+                ⚫ Shadow Signal detected — You are EARLY in this niche.
+
+              </div>
+
+            )}
 
             <p>Time to first sale: {data.time_to_first_sale}</p>
 
@@ -164,7 +232,7 @@ export default function Home(){
 
         {/* ---------- RADAR ---------- */}
 
-        {data?.mode==="radar" && data.niches.map((n:any,i:number)=>(
+        {(showReveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
 
           <div
             key={i}
@@ -182,7 +250,7 @@ export default function Home(){
 
               <div className="mt-4 border-t border-zinc-700 pt-4 space-y-2">
 
-                {!deepData && <p>AI diving deeper...</p>}
+                {!deepData && <p>⚫ Shadow Oracle diving deeper...</p>}
 
                 {deepData && (
 
