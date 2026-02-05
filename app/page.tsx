@@ -4,94 +4,118 @@ import { useState } from "react";
 
 export default function Home() {
   const [idea, setIdea] = useState("");
-  const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+
   const [score, setScore] = useState<string | null>(null);
+  const [best, setBest] = useState<string | null>(null);
+  const [miss, setMiss] = useState<string | null>(null);
+  const [alternatives, setAlternatives] = useState<string[]>([]);
 
   const analyzeIdea = async () => {
     if (!idea) return;
 
     setLoading(true);
-    setResult("");
     setScore(null);
+    setBest(null);
+    setMiss(null);
+    setAlternatives([]);
 
     const res = await fetch("/api/analyze", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idea }),
     });
 
-    const data = await res.json();
+    const { result } = await res.json();
 
-    const text = data.result;
+    // ---- PARSING ----
+    const scoreMatch = result.match(/Hidden Niche Score:\s*(\d+)/i);
+    if (scoreMatch) setScore(scoreMatch[1]);
 
-    const match = text.match(/Hidden Niche Score:\s*(\d+)/i);
-    if (match) {
-      setScore(match[1]);
+    const bestMatch = result.match(/Best Opportunity:(.*?)(Most founders miss this:|Alternative Opportunities:)/s);
+    if (bestMatch) setBest(bestMatch[1].trim());
+
+    const missMatch = result.match(/Most founders miss this:(.*?)(Alternative Opportunities:)/s);
+    if (missMatch) setMiss(missMatch[1].trim());
+
+    const altMatch = result.match(/Alternative Opportunities:(.*)/s);
+    if (altMatch) {
+      const items = altMatch[1]
+        .split("\n")
+        .map((s: string) => s.replace(/^\d+\.?\s*/, "").trim())
+        .filter(Boolean);
+      setAlternatives(items);
     }
 
-    setResult(text);
     setLoading(false);
   };
 
-  const copyResult = () => {
-    navigator.clipboard.writeText(result);
-  };
-
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-12">
+    <main className="min-h-screen bg-gray-50 px-4 py-12 flex justify-center">
+      <div className="w-full max-w-2xl">
 
-      <div className="max-w-2xl w-full">
-
-        <h1 className="text-4xl font-bold mb-4 text-center">
+        <h1 className="text-4xl font-bold text-center mb-4">
           Find Hidden Niches Instantly
         </h1>
 
-        <p className="text-gray-500 mb-8 text-center">
+        <p className="text-gray-500 text-center mb-8">
           Paste your startup idea and discover overlooked niche opportunities your competitors miss.
         </p>
 
         <textarea
-          placeholder="Describe your idea..."
           className="w-full p-4 border rounded-lg mb-4 bg-white"
+          placeholder="Describe your idea..."
           rows={4}
           value={idea}
           onChange={(e) => setIdea(e.target.value)}
         />
 
         <button
-          className="w-full bg-black text-white px-6 py-3 rounded-lg mb-8"
           onClick={analyzeIdea}
+          className="w-full bg-black text-white py-3 rounded-lg mb-10"
         >
           {loading ? "Analyzing..." : "Find Hidden Niches"}
         </button>
 
+        {/* SCORE */}
         {score && (
-          <div className="text-center text-5xl font-bold mb-6">
-            {score}/100
+          <div className="text-center mb-10">
+            <div className="text-sm text-gray-500 mb-1">Hidden Niche Score</div>
+            <div className="text-6xl font-bold">{score}/100</div>
           </div>
         )}
 
-        {result && (
-          <div className="bg-white border rounded-xl p-6 whitespace-pre-wrap leading-relaxed">
-            {result}
+        {/* BEST OPPORTUNITY */}
+        {best && (
+          <div className="bg-white border rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-3">🔥 Best Opportunity</h2>
+            <pre className="whitespace-pre-wrap text-sm leading-relaxed">
+              {best}
+            </pre>
+          </div>
+        )}
 
-            <div className="flex gap-4 mt-6 text-sm">
-              <button onClick={analyzeIdea} className="underline">
-                Try another angle →
-              </button>
+        {/* WARNING */}
+        {miss && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-2">⚠️ Most founders miss this</h2>
+            <p className="text-sm leading-relaxed">{miss}</p>
+          </div>
+        )}
 
-              <button onClick={copyResult} className="underline">
-                Copy result
-              </button>
-            </div>
+        {/* ALTERNATIVES */}
+        {alternatives.length > 0 && (
+          <div className="bg-white border rounded-xl p-6">
+            <h2 className="text-xl font-semibold mb-4">🔁 Alternative Opportunities</h2>
+            <ul className="list-disc pl-5 space-y-2 text-sm">
+              {alternatives.map((a, i) => (
+                <li key={i}>{a}</li>
+              ))}
+            </ul>
           </div>
         )}
 
       </div>
-
     </main>
   );
 }
