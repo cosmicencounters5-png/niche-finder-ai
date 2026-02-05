@@ -47,18 +47,25 @@ export default function Home() {
       />
 
       <button
-        className="bg-black text-white px-6 py-3 rounded-lg"
+        className="bg-black text-white px-6 py-3 rounded-lg mb-4"
         onClick={analyzeIdea}
       >
         {loading ? "Analyzing..." : "Find Hidden Niches"}
       </button>
 
       {result && (
-        <div
-          className="mt-8 p-4 border rounded-lg max-w-xl whitespace-pre-wrap text-left"
-        >
-          {result}
-        </div>
+        <>
+          <div className="mt-4 p-4 border rounded-lg max-w-xl whitespace-pre-wrap text-left">
+            {result}
+          </div>
+
+          <button
+            className="mt-4 underline text-sm"
+            onClick={analyzeIdea}
+          >
+            Try another angle →
+          </button>
+        </>
       )}
 
     </main>
