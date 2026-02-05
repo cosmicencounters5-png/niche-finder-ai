@@ -1,34 +1,86 @@
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
 export async function POST(req: Request) {
+
   const { idea } = await req.json();
 
+  /* ---------------- REDDIT TREND SCAN ---------------- */
+
+  const subreddits = [
+    "startups",
+    "Entrepreneur",
+    "sideproject",
+    "saas"
+  ];
+
+  let titles: string[] = [];
+
+  for (const sub of subreddits) {
+
+    try {
+
+      const res = await fetch(
+        `https://www.reddit.com/r/${sub}/hot.json?limit=10`
+      );
+
+      const json = await res.json();
+
+      const extracted = json.data.children.map(
+        (p: any) => p.data.title
+      );
+
+      titles = [...titles, ...extracted];
+
+    } catch (e) {
+      console.log("Reddit fetch failed", e);
+    }
+  }
+
+  /* ---------------- AI ENGINE ---------------- */
+
   const completion = await openai.chat.completions.create({
+
     model: "gpt-4o-mini",
+
     messages: [
+
       {
         role: "system",
         content: `
-You are an elite startup strategist.
+You are an elite niche discovery AI.
 
-You think like:
-- indie hackers
-- early adopters
-- product-market fit experts
+You detect:
 
-Your insights should feel like insider intelligence.
+- emerging trends
+- hidden frustrations
+- monetizable gaps
+- underserved audiences.
+
 Avoid generic startup advice.
-`,
+Be specific and bold.
+`
       },
+
       {
         role: "user",
         content: `
-Startup idea:
+User idea:
+
 ${idea}
+
+Trending discussions from Reddit:
+
+${titles.join("\n")}
+
+STEP 1:
+Identify recurring pain signals from trends.
+
+STEP 2:
+Combine pain signals with user idea.
 
 Return EXACT format:
 
@@ -41,25 +93,28 @@ Best Opportunity:
 - Why this could realistically succeed:
 - Viral positioning angle:
 
+Live Trend Signals:
+- bullet list
+
 Most founders miss this:
-- One sharp, non-obvious insight or warning.
 
 Alternative Opportunities:
 1.
 2.
+3.
 
 Autopilot Ideas:
 1.
 2.
-3.
+`
+      }
 
-Be bold, specific, and practical.
-`,
-      },
-    ],
+    ]
+
   });
 
   return Response.json({
-    result: completion.choices[0].message.content,
+    result: completion.choices[0].message.content
   });
+
 }
