@@ -5,41 +5,26 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-
   const { idea } = await req.json();
 
-  /* ---------- TREND RADAR ---------- */
-
-  const subs = ["startups","Entrepreneur","sideproject","saas"];
+  const subs = ["startups", "Entrepreneur", "sideproject", "saas"];
   let titles: string[] = [];
 
   for (const sub of subs) {
     try {
-      const res = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=8`);
+      const res = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=6`);
       const json = await res.json();
-      titles.push(
-        ...json.data.children.map((p:any)=>p.data.title)
-      );
+      titles.push(...json.data.children.map((p: any) => p.data.title));
     } catch {}
   }
 
-  /* ---------- GOD MODE V2 ---------- */
-
   const completion = await openai.chat.completions.create({
-
     model: "gpt-4o-mini",
-
     response_format: { type: "json_object" },
-
     messages: [
       {
         role: "system",
-        content: `
-You are GOD MODE.
-
-Return ONLY valid JSON.
-No explanations outside JSON.
-`
+        content: "You are GOD MODE. Return only valid JSON."
       },
       {
         role: "user",
@@ -50,31 +35,32 @@ ${idea}
 TREND SIGNALS:
 ${titles.join("\n")}
 
-Return:
+Return JSON:
 
 {
-  "verdict": "Build or Do NOT build",
-  "score": number,
-  "pain_cluster": {
-    "description": "",
-    "why_now": ""
+  "verdict": "",
+  "score": 0,
+  "refined_idea": "",
+  "ideal_customer": {
+    "who": "",
+    "where": "",
+    "trigger": ""
   },
   "best_opportunity": {
     "niche": "",
-    "target_user": "",
-    "why_underserved": "",
-    "timing": "",
-    "competitor_blindspot": ""
+    "why_now": "",
+    "blindspot": ""
   },
   "execution": {
     "day1": "",
     "week1": "",
     "first_revenue": ""
   },
-  "monetization": {
-    "method": "",
-    "price_range": "",
-    "reason": ""
+  "launch_plan": {
+    "mvp": "",
+    "traffic": "",
+    "monetization": "",
+    "next_72_hours": ""
   },
   "red_flags": [],
   "trend_signals": []
@@ -82,13 +68,9 @@ Return:
 `
       }
     ]
-
   });
 
-  const data = JSON.parse(
-    completion.choices[0].message.content!
+  return Response.json(
+    JSON.parse(completion.choices[0].message.content!)
   );
-
-  return Response.json(data);
-
 }
