@@ -5,6 +5,27 @@ import { useState } from "react";
 export default function Home() {
   const [idea, setIdea] = useState("");
   const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const analyzeIdea = async () => {
+    if (!idea) return;
+
+    setLoading(true);
+    setResult("");
+
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idea }),
+    });
+
+    const data = await res.json();
+
+    setResult(data.result);
+    setLoading(false);
+  };
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
@@ -27,16 +48,14 @@ export default function Home() {
 
       <button
         className="bg-black text-white px-6 py-3 rounded-lg"
-        onClick={() => {
-          setResult(`Analyzing idea: "${idea}"`);
-        }}
+        onClick={analyzeIdea}
       >
-        Find Hidden Niches
+        {loading ? "Analyzing..." : "Find Hidden Niches"}
       </button>
 
       {result && (
-        <div className="mt-8 p-4 border rounded-lg max-w-xl">
-          <p className="font-medium">{result}</p>
+        <div className="mt-8 p-4 border rounded-lg max-w-xl whitespace-pre-wrap text-left">
+          {result}
         </div>
       )}
 
