@@ -20,25 +20,15 @@ export default function Home(){
     setSelected(null);
     setDeepData(null);
 
-    try{
+    const res=await fetch("/api/analyze",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ idea })
+    });
 
-      const res=await fetch("/api/analyze",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ idea })
-      });
+    const json=await res.json();
 
-      const json = await res.json();
-
-      console.log("ANALYZE RESULT:",json);
-
-      setData(json);
-
-    }catch(err){
-
-      console.log("analyze error",err);
-
-    }
+    setData(json);
 
     setLoading(false);
 
@@ -87,7 +77,7 @@ export default function Home(){
       <div className="max-w-xl w-full space-y-6">
 
         <h1 className="text-3xl font-bold text-center">
-          🔥 Ultimate Niche Engine
+          🔥 Oracle Evolution X
         </h1>
 
         <textarea
@@ -117,29 +107,62 @@ export default function Home(){
 
         {(data?.mode==="idea" || data?.name) && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl space-y-2">
+          <div className="bg-zinc-900 p-6 rounded-xl space-y-4">
 
             <h2 className="text-xl font-semibold">
               🔥 {data.name}
             </h2>
 
-            <p>Score: {data.score}/100</p>
+            <p>Opportunity Score: {data.score}/100</p>
+
+            {/* SUCCESS PROBABILITY METER */}
+
+            <div>
+
+              <p className="mb-1">
+                🔥 Success Probability: {data.success_probability}%
+              </p>
+
+              <div className="w-full h-3 bg-zinc-800 rounded">
+
+                <div
+                  className="h-3 bg-green-500 rounded transition-all duration-700"
+                  style={{ width:`${data.success_probability}%` }}
+                />
+
+              </div>
+
+            </div>
+
+            <p>Time to first sale: {data.time_to_first_sale}</p>
+
+            <p>Market heat: {data.market_heat}</p>
+            <p>Buyer intent: {data.buyer_intent}</p>
 
             <p>{data.why_trending}</p>
 
-            <p><strong>Pain signal:</strong> {data.pain_signal}</p>
+            <p><strong>Pain:</strong> {data.pain_signal}</p>
 
             <p><strong>Hidden opportunity:</strong> {data.hidden_signal}</p>
 
-            <p><strong>Monetization:</strong> {data.monetization}</p>
+            <div className="border-t border-zinc-700 pt-3 space-y-1">
 
+              <p className="font-semibold">Execution Plan</p>
+
+              <p>Day 1: {data.execution?.day1}</p>
+              <p>Week 1: {data.execution?.week1}</p>
+              <p>First revenue: {data.execution?.first_revenue}</p>
+
+            </div>
+
+            <p><strong>Monetization:</strong> {data.monetization}</p>
             <p><strong>Competition:</strong> {data.competition}</p>
 
           </div>
 
         )}
 
-        {/* ---------- RADAR RESULTS ---------- */}
+        {/* ---------- RADAR ---------- */}
 
         {data?.mode==="radar" && data.niches.map((n:any,i:number)=>(
 
