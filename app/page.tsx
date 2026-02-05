@@ -27,6 +27,10 @@ export default function Home() {
     setLoading(false);
   };
 
+  const copyResult = () => {
+    navigator.clipboard.writeText(result);
+  };
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
 
@@ -64,6 +68,13 @@ export default function Home() {
             onClick={analyzeIdea}
           >
             Try another angle →
+          </button>
+
+          <button
+            className="mt-2 text-sm underline"
+            onClick={copyResult}
+          >
+            Copy result
           </button>
         </>
       )}
