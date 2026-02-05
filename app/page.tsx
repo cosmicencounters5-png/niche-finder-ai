@@ -11,6 +11,7 @@ type BestOpportunity = {
 };
 
 export default function Home() {
+
   const [dark, setDark] = useState(false);
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,14 +19,16 @@ export default function Home() {
   const [score, setScore] = useState<number | null>(null);
   const [displayScore, setDisplayScore] = useState(0);
 
-  const [best, setBest] = useState<BestOpportunity>({});
-  const [miss, setMiss] = useState("");
-  const [typedMiss, setTypedMiss] = useState("");
+  const [verdict, setVerdict] = useState("");
 
-  const [alts, setAlts] = useState<string[]>([]);
-  const [typedAlts, setTypedAlts] = useState<string[]>([]);
+  const [best, setBest] = useState<BestOpportunity>({});
+  const [execution, setExecution] = useState<any>(null);
+  const [monetization, setMonetization] = useState<any>(null);
+  const [redFlags, setRedFlags] = useState<string[]>([]);
+  const [trendSignals, setTrendSignals] = useState<string[]>([]);
 
   /* ---------------- DARK MODE ---------------- */
+
   useEffect(() => {
     const saved = localStorage.getItem("theme");
     if (saved === "dark") {
@@ -36,6 +39,7 @@ export default function Home() {
 
   const toggleDark = () => {
     const html = document.documentElement;
+
     if (html.classList.contains("dark")) {
       html.classList.remove("dark");
       localStorage.setItem("theme", "light");
@@ -48,73 +52,37 @@ export default function Home() {
   };
 
   /* ---------------- SCORE ANIMATION ---------------- */
+
   useEffect(() => {
     if (score === null) return;
 
     let current = 0;
+
     const interval = setInterval(() => {
+
       current += 1;
       setDisplayScore(current);
+
       if (current >= score) {
         setDisplayScore(score);
         clearInterval(interval);
       }
-    }, 25); // 👈 langsommere
+
+    }, 20);
 
     return () => clearInterval(interval);
+
   }, [score]);
 
-  /* ---------------- TYPING: MISS (SEKVENSIELL) ---------------- */
-  useEffect(() => {
-    if (!miss || score === null) return;
+  /* ---------------- AI CALL (GOD MODE V2) ---------------- */
 
-    // vent til score er ferdig + liten pause
-    const delay = setTimeout(() => {
-      let i = 0;
-      setTypedMiss("");
-
-      const interval = setInterval(() => {
-        setTypedMiss((prev) => prev + miss[i]);
-        i++;
-        if (i >= miss.length) clearInterval(interval);
-      }, 30); // 👈 tydelig typing
-
-    }, 800);
-
-    return () => clearTimeout(delay);
-  }, [miss, score]);
-
-  /* ---------------- TYPING: ALTERNATIVES (ETTER MISS) ---------------- */
-  useEffect(() => {
-    if (alts.length === 0 || typedMiss.length < miss.length) return;
-
-    const delay = setTimeout(() => {
-      let index = 0;
-      setTypedAlts([]);
-
-      const reveal = setInterval(() => {
-        setTypedAlts((prev) => [...prev, alts[index]]);
-        index++;
-        if (index >= alts.length) clearInterval(reveal);
-      }, 600); // 👈 én og én
-
-    }, 600);
-
-    return () => clearTimeout(delay);
-  }, [alts, typedMiss]);
-
-  /* ---------------- AI CALL ---------------- */
   const analyzeIdea = async () => {
+
     if (!idea) return;
 
     setLoading(true);
     setScore(null);
     setDisplayScore(0);
-    setBest({});
-    setMiss("");
-    setTypedMiss("");
-    setAlts([]);
-    setTypedAlts([]);
 
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -122,40 +90,27 @@ export default function Home() {
       body: JSON.stringify({ idea }),
     });
 
-    const { result } = await res.json();
+    const data = await res.json();
 
-    const extract = (label: string) => {
-      const m = result.match(new RegExp(`${label}:([\\s\\S]*?)(\\n-|$)`));
-      return m ? m[1].trim() : undefined;
-    };
+    setVerdict(data.verdict);
 
-    const scoreMatch = result.match(/Hidden Niche Score:\s*(\d+)/i);
-    if (scoreMatch) setScore(Number(scoreMatch[1]));
+    setScore(data.score);
 
     setBest({
-      niche: extract("Niche"),
-      targets: extract("Who it targets"),
-      underserved: extract("Why underserved"),
-      success: extract("Why this could realistically succeed"),
-      viral: extract("Viral positioning angle"),
+      niche: data.best_opportunity?.niche,
+      targets: data.best_opportunity?.target_user,
+      underserved: data.best_opportunity?.why_underserved,
+      success: data.best_opportunity?.timing,
+      viral: data.best_opportunity?.competitor_blindspot,
     });
 
-    const missMatch = result.match(
-      /Most founders miss this:([\s\S]*?)(Alternative Opportunities:)/
-    );
-    if (missMatch) setMiss(missMatch[1].trim());
-
-    const altMatch = result.match(/Alternative Opportunities:([\s\S]*?)(Autopilot Ideas:|$)/);
-    if (altMatch) {
-      setAlts(
-        altMatch[1]
-          .split("\n")
-          .map((s) => s.replace(/^\d+\.?\s*/, "").trim())
-          .filter(Boolean)
-      );
-    }
+    setExecution(data.execution);
+    setMonetization(data.monetization);
+    setRedFlags(data.red_flags || []);
+    setTrendSignals(data.trend_signals || []);
 
     setLoading(false);
+
   };
 
   const Field = ({ label, value }: { label: string; value?: string }) =>
@@ -167,12 +122,16 @@ export default function Home() {
     ) : null;
 
   /* ---------------- UI ---------------- */
+
   return (
     <main className="min-h-screen bg-gray-100 dark:bg-black text-black dark:text-white transition-colors duration-300 px-4 py-10 flex justify-center">
+
       <div className="w-full max-w-xl space-y-6">
 
         {/* INPUT */}
+
         <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl relative">
+
           <button onClick={toggleDark} className="absolute top-4 right-4">
             {dark ? "☀️" : "🌙"}
           </button>
@@ -195,12 +154,26 @@ export default function Home() {
           >
             {loading ? "Analyzing..." : "Find Hidden Niches"}
           </button>
+
         </div>
 
+        {/* VERDICT */}
+
+        {verdict && (
+          <div className={`p-4 rounded-xl text-center font-semibold ${
+            verdict.includes("NOT") ? "bg-red-500 text-white" : "bg-green-500 text-white"
+          }`}>
+            {verdict}
+          </div>
+        )}
+
         {/* SCORE */}
+
         {score !== null && (
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl text-center">
+
             <p className="text-sm text-gray-500">Hidden Niche Score</p>
+
             <p className="text-5xl font-bold mb-4">{displayScore}/100</p>
 
             <div className="w-full h-2 bg-gray-200 dark:bg-zinc-700 rounded">
@@ -209,42 +182,55 @@ export default function Home() {
                 style={{ width: `${displayScore}%` }}
               />
             </div>
+
           </div>
         )}
 
-        {/* BEST */}
+        {/* BEST OPPORTUNITY */}
+
         {best.niche && (
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl space-y-4">
+
             <h2 className="font-semibold text-lg">🔥 Best Opportunity</h2>
+
             <Field label="Niche" value={best.niche} />
             <Field label="Who it targets" value={best.targets} />
             <Field label="Why underserved" value={best.underserved} />
-            <Field label="Why this works" value={best.success} />
-            <Field label="Viral positioning" value={best.viral} />
+            <Field label="Why NOW" value={best.success} />
+            <Field label="Competitor blindspot" value={best.viral} />
+
           </div>
         )}
 
-        {/* MISS */}
-        {typedMiss && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl">
-            <h2 className="font-semibold mb-2">⚠️ Most founders miss this</h2>
-            <p>{typedMiss}</p>
+        {/* EXECUTION */}
+
+        {execution && (
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl space-y-2">
+
+            <h2 className="font-semibold">🚀 Execution Blueprint</h2>
+
+            <p>Day 1: {execution.day1}</p>
+            <p>Week 1: {execution.week1}</p>
+            <p>First revenue: {execution.first_revenue}</p>
+
           </div>
         )}
 
-        {/* ALTERNATIVES */}
-        {typedAlts.length > 0 && (
+        {/* MONETIZATION */}
+
+        {monetization && (
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl">
-            <h2 className="font-semibold mb-3">🔁 Alternative Opportunities</h2>
-            <ul className="list-disc pl-5 space-y-2 text-sm">
-              {typedAlts.map((a, i) => (
-                <li key={i}>{a}</li>
-              ))}
-            </ul>
+
+            <h2 className="font-semibold mb-2">💰 Monetization</h2>
+
+            <p>{monetization.method}</p>
+            <p>{monetization.price_range}</p>
+
           </div>
         )}
 
       </div>
+
     </main>
   );
 }
