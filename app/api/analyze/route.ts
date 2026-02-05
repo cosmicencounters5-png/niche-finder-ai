@@ -5,45 +5,40 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
+
   const { idea } = await req.json();
 
-  /* ---------- TREND RADAR (REDDIT) ---------- */
-  const subreddits = ["startups", "Entrepreneur", "sideproject", "saas"];
+  /* ---------- TREND RADAR ---------- */
+
+  const subs = ["startups","Entrepreneur","sideproject","saas"];
   let titles: string[] = [];
 
-  for (const sub of subreddits) {
+  for (const sub of subs) {
     try {
       const res = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=8`);
       const json = await res.json();
-      const extracted = json.data.children.map((p: any) => p.data.title);
-      titles.push(...extracted);
+      titles.push(
+        ...json.data.children.map((p:any)=>p.data.title)
+      );
     } catch {}
   }
 
-  /* ---------- GOD MODE AI ---------- */
+  /* ---------- GOD MODE V2 ---------- */
+
   const completion = await openai.chat.completions.create({
+
     model: "gpt-4o-mini",
+
+    response_format: { type: "json_object" },
+
     messages: [
       {
         role: "system",
         content: `
 You are GOD MODE.
 
-You do not brainstorm.
-You decide.
-
-You combine:
-- live internet pain signals
-- market timing
-- execution realism
-
-You are allowed to say:
-- "do not build this"
-- "this is a rare opportunity"
-- "this will fail for 90% of people"
-
-Be brutally honest.
-Avoid fluff.
+Return ONLY valid JSON.
+No explanations outside JSON.
 `
       },
       {
@@ -52,53 +47,48 @@ Avoid fluff.
 USER IDEA:
 ${idea}
 
-LIVE TREND SIGNALS (Reddit):
+TREND SIGNALS:
 ${titles.join("\n")}
 
-TASK:
+Return:
 
-1. Detect emerging pain clusters.
-2. Combine with the user idea.
-3. Decide if this is worth building.
-
-Return EXACT format:
-
-Verdict:
-(Build / Do NOT build)
-
-Hidden Niche Score: (1-100)
-
-Core Pain Cluster:
-- Description
-- Why it's getting worse now
-
-Best Opportunity:
-- Niche:
-- Target user:
-- Why underserved:
-- Why NOW (timing):
-- Why competitors are blind:
-
-Execution Blueprint:
-Step 1 (Day 1):
-Step 2 (Week 1):
-Step 3 (First revenue):
-
-Fastest Monetization Path:
-- Method
-- Price range
-- Why this works
-
-Red Flags (Read this carefully):
-- bullet list
-
-If Verdict is "Do NOT build", explain exactly why.
+{
+  "verdict": "Build or Do NOT build",
+  "score": number,
+  "pain_cluster": {
+    "description": "",
+    "why_now": ""
+  },
+  "best_opportunity": {
+    "niche": "",
+    "target_user": "",
+    "why_underserved": "",
+    "timing": "",
+    "competitor_blindspot": ""
+  },
+  "execution": {
+    "day1": "",
+    "week1": "",
+    "first_revenue": ""
+  },
+  "monetization": {
+    "method": "",
+    "price_range": "",
+    "reason": ""
+  },
+  "red_flags": [],
+  "trend_signals": []
+}
 `
       }
     ]
+
   });
 
-  return Response.json({
-    result: completion.choices[0].message.content
-  });
+  const data = JSON.parse(
+    completion.choices[0].message.content!
+  );
+
+  return Response.json(data);
+
 }
