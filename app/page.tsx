@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type BestOpportunity = {
   niche?: string;
@@ -14,11 +14,44 @@ export default function Home() {
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [dark, setDark] = useState(false);
+
   const [score, setScore] = useState<string | null>(null);
   const [best, setBest] = useState<BestOpportunity>({});
   const [miss, setMiss] = useState<string | null>(null);
   const [alternatives, setAlternatives] = useState<string[]>([]);
   const [autopilot, setAutopilot] = useState<string[]>([]);
+
+  // DARK MODE INIT
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+      setDark(true);
+    } else if (saved === "light") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (systemDark) {
+        document.documentElement.classList.add("dark");
+        setDark(true);
+      }
+    }
+  }, []);
+
+  const toggleDark = () => {
+    const newMode = !dark;
+    setDark(newMode);
+
+    if (newMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const analyzeIdea = async () => {
     if (!idea) return;
@@ -87,7 +120,16 @@ export default function Home() {
 
       <div className="w-full max-w-xl space-y-6">
 
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm">
+        {/* HEADER */}
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm relative">
+
+          <button
+            onClick={toggleDark}
+            className="absolute top-4 right-4 text-sm opacity-70 hover:opacity-100"
+          >
+            {dark ? "☀️" : "🌙"}
+          </button>
+
           <h1 className="text-3xl font-bold text-center mb-2">
             Find Hidden Niches Instantly
           </h1>
@@ -118,6 +160,7 @@ export default function Home() {
         {best.niche && (
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl space-y-4">
             <h2 className="font-semibold text-lg">🔥 Best Opportunity</h2>
+
             <Field label="Niche" value={best.niche} />
             <Field label="Who it targets" value={best.targets} />
             <Field label="Why underserved" value={best.underserved} />
