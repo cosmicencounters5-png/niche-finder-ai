@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import jsPDF from "jspdf";
 
 export default function Home() {
 
@@ -25,6 +24,7 @@ export default function Home() {
     let n = 0;
 
     const i = setInterval(() => {
+
       n++;
       setDisplayScore(n);
 
@@ -52,56 +52,11 @@ export default function Home() {
 
   };
 
-  /* ---------------- PDF DOWNLOAD ---------------- */
+  /* -------- PDF via browser print -------- */
 
   const downloadPDF = () => {
-
-    if (!data) return;
-
-    const doc = new jsPDF();
-
-    let y = 10;
-
-    const add = (text: string) => {
-      doc.text(text, 10, y);
-      y += 8;
-    };
-
-    add("AI Founder Launch Report");
-    add("---------------------------");
-
-    add("Idea:");
-    add(idea);
-
-    add("");
-    add("Verdict: " + data.verdict);
-    add("Score: " + data.score + "/100");
-
-    add("");
-    add("Refined Idea:");
-    add(data.refined_idea);
-
-    add("");
-    add("Target Customer:");
-    add(data.ideal_customer?.who || "");
-
-    add("");
-    add("Execution:");
-    add("Day 1: " + data.execution?.day1);
-    add("Week 1: " + data.execution?.week1);
-    add("First Revenue: " + data.execution?.first_revenue);
-
-    add("");
-    add("Launch Plan:");
-    add("MVP: " + data.launch_plan?.mvp);
-    add("Traffic: " + data.launch_plan?.traffic);
-    add("Monetization: " + data.launch_plan?.monetization);
-
-    doc.save("AI-launch-plan.pdf");
-
+    window.print();
   };
-
-  /* ---------------- UI ---------------- */
 
   return (
 
@@ -142,7 +97,7 @@ export default function Home() {
               onClick={downloadPDF}
               className="w-full border py-3 rounded-lg"
             >
-              📄 Download Launch Plan (PDF)
+              📄 Save Launch Plan as PDF
             </button>
 
           </>
