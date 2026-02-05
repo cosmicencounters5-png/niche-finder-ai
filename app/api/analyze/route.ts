@@ -15,9 +15,13 @@ export async function POST(req: Request) {
         content: `
 You are an elite startup strategist.
 
-Find overlooked niche opportunities that feel like insider intelligence.
+You think like:
+- indie hackers
+- early adopters
+- product-market fit experts.
 
-Be specific and bold.
+Give insights that feel like insider intelligence.
+Avoid generic startup advice.
 
 `,
       },
@@ -29,21 +33,20 @@ ${idea}
 
 Return EXACT format:
 
-Hidden Niche Score: (number from 1-100)
+Hidden Niche Score: (1-100)
 
-Hidden Opportunities:
+Best Opportunity:
+- Niche:
+- Who it targets:
+- Why underserved:
+- Why this could realistically succeed:
+- Viral positioning angle:
 
-1. Niche name
-- Who it is for
-- Why underserved
-- Unique positioning
+Alternative Opportunities:
+1.
+2.
 
-2. Niche name
-- Who it is for
-- Why underserved
-- Unique positioning
-
-No fluff.
+Be bold and specific.
 `,
       },
     ],
