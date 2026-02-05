@@ -4,54 +4,61 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export async function POST(req:Request){
+export async function POST(req: Request) {
 
-  const body = await req.json().catch(()=>({}));
+  try {
 
-  const idea = body.idea;
-  const deep = body.deep;
-  const niche = body.niche;
+    const body = await req.json().catch(()=>({}));
 
-  /* ---------- ORACLE DEEP MODE ---------- */
+    const idea = body.idea;
+    const deep = body.deep;
+    const niche = body.niche;
 
-  if(deep){
+    /* ---------- DEEP ORACLE ---------- */
 
-    let marketSignals:string[]=[];
+    if(deep){
 
-    try{
+      let marketSignals:string[]=[];
 
-      const res = await fetch(
-        `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&limit=12`
-      );
+      try{
 
-      const json = await res.json();
+        const reddit = await fetch(
+          `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&limit=10`
+        );
 
-      marketSignals = json.data.children.map((p:any)=>p.data.title);
+        const json = await reddit.json();
 
-    }catch{}
+        if(json?.data?.children){
 
-    const completion = await openai.chat.completions.create({
+          marketSignals = json.data.children.map(
+            (p:any)=>p.data.title
+          );
 
-      model:"gpt-4o-mini",
+        }
 
-      response_format:{ type:"json_object" },
+      }catch(e){
+        console.log("reddit fetch failed");
+      }
 
-      messages:[{
+      const completion = await openai.chat.completions.create({
 
-        role:"user",
-        content:`
+        model:"gpt-4o-mini",
+
+        response_format:{ type:"json_object" },
+
+        messages:[{
+          role:"user",
+          content:`
 
 Niche:
 
 ${niche}
 
-REAL MARKET DISCUSSIONS:
+Market signals:
 
 ${marketSignals.join("\n")}
 
-Analyze like an elite startup strategist.
-
-Return:
+Return ONLY JSON:
 
 {
  "execution":"",
@@ -59,56 +66,61 @@ Return:
  "traffic":"",
  "monetization":"",
  "hidden_angle":"",
- "risk":"",
- "real_market_signals":[]
+ "risk":""
 }
 
 `
-      }]
+        }]
 
-    });
+      });
 
-    return Response.json(
-      JSON.parse(completion.choices[0].message.content!)
-    );
+      const content = completion.choices[0].message.content;
 
-  }
+      return Response.json(JSON.parse(content!));
 
-  /* ---------- RADAR / IDEA MODE ---------- */
+    }
 
-  const subs = ["startups","Entrepreneur","sideproject","SaaS","ChatGPT"];
+    /* ---------- NORMAL MODE ---------- */
 
-  let titles:string[]=[];
+    const subs = ["startups","Entrepreneur","sideproject"];
 
-  for(const sub of subs){
+    let titles:string[]=[];
 
-    try{
+    for(const sub of subs){
 
-      const res = await fetch(
-        `https://www.reddit.com/r/${sub}/hot.json?limit=8`
-      );
+      try{
 
-      const json = await res.json();
+        const reddit = await fetch(
+          `https://www.reddit.com/r/${sub}/hot.json?limit=6`
+        );
 
-      titles.push(
-        ...json.data.children.map((p:any)=>p.data.title)
-      );
+        const json = await reddit.json();
 
-    }catch{}
+        if(json?.data?.children){
 
-  }
+          titles.push(
+            ...json.data.children.map((p:any)=>p.data.title)
+          );
 
-  const prompt = idea
-  ? `
-User idea:
+        }
+
+      }catch(e){
+        console.log("subreddit fail:",sub);
+      }
+
+    }
+
+    const prompt = idea
+    ? `
+Idea:
 
 ${idea}
 
-Trending signals:
+Trending:
 
 ${titles.join("\n")}
 
-Return:
+Return JSON:
 
 {
  "mode":"idea",
@@ -121,39 +133,49 @@ Return:
  "competition":""
 }
 `
-  : `
+    : `
 Trending discussions:
 
 ${titles.join("\n")}
 
-Return:
+Return JSON:
 
 {
  "mode":"radar",
  "niches":[
-   {
-    "name":"",
-    "score":0,
-    "why_trending":"",
-    "pain_signal":"",
-    "hidden_signal":"",
-    "monetization":"",
-    "competition":""
-   }
+  {
+   "name":"",
+   "score":0,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  }
  ]
 }
 `;
 
-  const completion = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
 
-    model:"gpt-4o-mini",
-    response_format:{ type:"json_object" },
-    messages:[{role:"user",content:prompt}]
+      model:"gpt-4o-mini",
+      response_format:{ type:"json_object" },
+      messages:[{role:"user",content:prompt}]
 
-  });
+    });
 
-  return Response.json(
-    JSON.parse(completion.choices[0].message.content!)
-  );
+    return Response.json(
+      JSON.parse(completion.choices[0].message.content!)
+    );
+
+  } catch(err){
+
+    console.log(err);
+
+    return Response.json({
+      error:"oracle failed"
+    });
+
+  }
 
 }
