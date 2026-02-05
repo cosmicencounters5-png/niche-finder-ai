@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth AI reveal animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
