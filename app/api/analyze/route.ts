@@ -14,11 +14,11 @@ export async function POST(req: Request) {
     const deep = body.deep;
     const niche = body.niche;
 
-    /* ---------- DEEP ORACLE ---------- */
+    /* ---------- DEEP ORACLE MODE ---------- */
 
     if(deep){
 
-      let marketSignals:string[]=[];
+      let marketSignals:string[] = [];
 
       try{
 
@@ -47,18 +47,19 @@ export async function POST(req: Request) {
         response_format:{ type:"json_object" },
 
         messages:[{
-          role:"user",
-          content:`
 
+          role:"user",
+
+          content:`
 Niche:
 
 ${niche}
 
-Market signals:
+REAL MARKET SIGNALS:
 
 ${marketSignals.join("\n")}
 
-Return ONLY JSON:
+Return STRICT JSON ONLY:
 
 {
  "execution":"",
@@ -68,8 +69,8 @@ Return ONLY JSON:
  "hidden_angle":"",
  "risk":""
 }
-
 `
+
         }]
 
       });
@@ -80,11 +81,11 @@ Return ONLY JSON:
 
     }
 
-    /* ---------- NORMAL MODE ---------- */
+    /* ---------- NORMAL MODE (IDEA + RADAR) ---------- */
 
     const subs = ["startups","Entrepreneur","sideproject"];
 
-    let titles:string[]=[];
+    let titles:string[] = [];
 
     for(const sub of subs){
 
@@ -112,25 +113,26 @@ Return ONLY JSON:
 
     const prompt = idea
     ? `
-Idea:
+User idea:
 
 ${idea}
 
-Trending:
+Trending discussions:
 
 ${titles.join("\n")}
 
-Return JSON:
+IMPORTANT:
+Return STRICT JSON ONLY.
 
 {
  "mode":"idea",
- "name":"",
- "score":0,
- "why_trending":"",
- "pain_signal":"",
- "hidden_signal":"",
- "monetization":"",
- "competition":""
+ "name":"short niche name",
+ "score":85,
+ "why_trending":"short explanation",
+ "pain_signal":"real user pain",
+ "hidden_signal":"non-obvious opportunity",
+ "monetization":"how money is made",
+ "competition":"low / medium / high"
 }
 `
     : `
@@ -138,14 +140,15 @@ Trending discussions:
 
 ${titles.join("\n")}
 
-Return JSON:
+IMPORTANT:
+Return STRICT JSON ONLY.
 
 {
  "mode":"radar",
  "niches":[
   {
    "name":"",
-   "score":0,
+   "score":80,
    "why_trending":"",
    "pain_signal":"",
    "hidden_signal":"",
@@ -159,18 +162,20 @@ Return JSON:
     const completion = await openai.chat.completions.create({
 
       model:"gpt-4o-mini",
+
       response_format:{ type:"json_object" },
-      messages:[{role:"user",content:prompt}]
+
+      messages:[{ role:"user", content:prompt }]
 
     });
 
-    return Response.json(
-      JSON.parse(completion.choices[0].message.content!)
-    );
+    const content = completion.choices[0].message.content;
+
+    return Response.json(JSON.parse(content!));
 
   } catch(err){
 
-    console.log(err);
+    console.log("ORACLE ERROR:", err);
 
     return Response.json({
       error:"oracle failed"
