@@ -4,27 +4,29 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export async function POST() {
+export async function POST(req:Request){
 
-  /* ---------- LIVE TREND SCAN ---------- */
+  const body = await req.json().catch(()=>({}));
+  const idea = body?.idea;
+
+  /* ---------- TREND FETCH ---------- */
 
   const subs = [
     "startups",
     "Entrepreneur",
     "sideproject",
     "SaaS",
-    "ChatGPT",
-    "ArtificialInteligence"
+    "ChatGPT"
   ];
 
   let titles:string[] = [];
 
-  for (const sub of subs) {
+  for(const sub of subs){
 
-    try {
+    try{
 
       const res = await fetch(
-        `https://www.reddit.com/r/${sub}/hot.json?limit=10`
+        `https://www.reddit.com/r/${sub}/hot.json?limit=8`
       );
 
       const json = await res.json();
@@ -33,67 +35,67 @@ export async function POST() {
         ...json.data.children.map((p:any)=>p.data.title)
       );
 
-    } catch {}
+    }catch{}
 
   }
 
-  /* ---------- AI ULTIMATE ENGINE ---------- */
+  /* ---------- PROMPT ---------- */
 
-  const completion = await openai.chat.completions.create({
+  const prompt = idea
+  ? `
+User idea:
 
-    model: "gpt-4o-mini",
+${idea}
 
-    response_format:{ type:"json_object" },
+Trending signals:
 
-    messages:[
+${titles.join("\n")}
 
-      {
-        role:"system",
-        content:`
-You are an elite AI niche detection engine.
+Analyse the idea and find best niche angle.
 
-Detect emerging opportunities BEFORE mainstream.
+Return JSON:
 
-Score based on:
-
-- trend velocity
-- unmet demand
-- competition saturation
-- monetization clarity
-- speed to build
-
-Avoid generic ideas.
+{
+ "mode":"idea",
+ "name":"",
+ "score":0,
+ "why_trending":"",
+ "pain_signal":"",
+ "hidden_signal":"",
+ "monetization":"",
+ "competition":""
+}
 `
-      },
-
-      {
-        role:"user",
-        content:`
+  : `
 Trending discussions:
 
 ${titles.join("\n")}
 
-Return:
+Find 3 emerging niches.
+
+Return JSON:
 
 {
+ "mode":"radar",
  "niches":[
    {
     "name":"",
     "score":0,
-    "confidence":"",
     "why_trending":"",
     "pain_signal":"",
     "hidden_signal":"",
-    "competition":"",
     "monetization":"",
-    "speed_to_build":""
+    "competition":""
    }
  ]
 }
-`
-      }
+`;
 
-    ]
+  const completion = await openai.chat.completions.create({
+
+    model:"gpt-4o-mini",
+    response_format:{ type:"json_object" },
+    messages:[{role:"user",content:prompt}]
 
   });
 
