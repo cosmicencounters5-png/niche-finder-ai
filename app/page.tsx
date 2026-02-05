@@ -7,11 +7,10 @@ export default function Home(){
   const [idea,setIdea]=useState("");
   const [loading,setLoading]=useState(false);
   const [data,setData]=useState<any>(null);
-  const [deepData,setDeepData]=useState<any>(null);
-  const [selected,setSelected]=useState<number|null>(null);
 
   const [scanStep,setScanStep]=useState("");
   const [showReveal,setShowReveal]=useState(false);
+  const [unlock,setUnlock]=useState(false);
 
   const scanMessages = [
     "Scanning Reddit signals...",
@@ -47,9 +46,8 @@ export default function Home(){
 
     setLoading(true);
     setShowReveal(false);
-    setSelected(null);
-    setDeepData(null);
     setData(null);
+    setUnlock(false);
 
     runScanAnimation();
 
@@ -69,46 +67,6 @@ export default function Home(){
       setLoading(false);
 
     },800);
-
-  };
-
-  const radar=async()=>{
-
-    setLoading(true);
-    setShowReveal(false);
-    setSelected(null);
-    setDeepData(null);
-
-    runScanAnimation();
-
-    const res=await fetch("/api/analyze",{ method:"POST" });
-
-    setData(await res.json());
-
-    setTimeout(()=>{
-
-      setLoading(false);
-      setShowReveal(true);
-
-    },800);
-
-  };
-
-  const deepScan=async(niche:string,index:number)=>{
-
-    setSelected(index);
-    setDeepData(null);
-
-    const res=await fetch("/api/analyze",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        deep:true,
-        niche
-      })
-    });
-
-    setDeepData(await res.json());
 
   };
 
@@ -136,13 +94,6 @@ export default function Home(){
           Analyze Idea
         </button>
 
-        <button
-          onClick={radar}
-          className="w-full border py-3 rounded-lg"
-        >
-          Scan Emerging Niches
-        </button>
-
         {loading && (
 
           <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse">
@@ -153,9 +104,7 @@ export default function Home(){
 
         )}
 
-        {/* ---------- IDEA RESULT ---------- */}
-
-        {(showReveal && (data?.mode==="idea" || data?.name)) && (
+        {(showReveal && data?.name) && (
 
           <div className="bg-zinc-900 p-6 rounded-xl space-y-4">
 
@@ -165,53 +114,17 @@ export default function Home(){
 
             <p>Opportunity Score: {data.score}/100</p>
 
-            {/* SUCCESS METER */}
-
-            <div>
-
-              <p className="mb-1">
-                🔥 Success Probability: {data.success_probability}%
-              </p>
-
-              <div className="w-full h-3 bg-zinc-800 rounded">
-
-                <div
-                  className="h-3 bg-green-500 rounded transition-all duration-700"
-                  style={{ width:`${data.success_probability}%` }}
-                />
-
-              </div>
-
-            </div>
+            <p>
+              🔥 Success Probability: {data.success_probability}%
+            </p>
 
             {data.success_probability > 65 && (
 
               <div className="bg-green-900/30 p-3 rounded-lg text-sm">
-                ⚫ Shadow Signal detected — You are EARLY in this niche.
+                ⚫ Shadow Signal detected — You are EARLY.
               </div>
 
             )}
-
-            {/* FUTURE TRAJECTORY */}
-
-            {data.trend_trajectory && (
-
-              <div className="bg-zinc-800 p-3 rounded-lg text-sm">
-
-                <p className="font-semibold mb-1">📈 Predicted trajectory</p>
-
-                <p>Next 30 days: {data.trend_trajectory["30_days"]}</p>
-                <p>Next 90 days: {data.trend_trajectory["90_days"]}</p>
-
-              </div>
-
-            )}
-
-            <p>{data.why_trending}</p>
-
-            <p><strong>Pain:</strong> {data.pain_signal}</p>
-
-            <p><strong>Hidden opportunity:</strong> {data.hidden_signal}</p>
 
             {/* HOT PRODUCTS */}
 
@@ -219,7 +132,7 @@ export default function Home(){
 
               <div className="space-y-3">
 
-                <p className="font-semibold">🔥 Hot products inside this niche</p>
+                <p className="font-semibold">🔥 Hot products</p>
 
                 {data.hot_products.map((p:any,i:number)=>(
 
@@ -237,57 +150,41 @@ export default function Home(){
 
             )}
 
-            <div className="border-t border-zinc-700 pt-3 space-y-1">
+            {/* LOCKED INTELLIGENCE */}
 
-              <p className="font-semibold">Execution Plan</p>
+            {!unlock && (
 
-              <p>Day 1: {data.execution?.day1}</p>
-              <p>Week 1: {data.execution?.week1}</p>
-              <p>First revenue: {data.execution?.first_revenue}</p>
+              <div className="bg-zinc-800 p-6 rounded-xl text-center space-y-3">
 
-            </div>
+                <p className="font-semibold">
+                  ⚫ Deep Oracle Intelligence Locked
+                </p>
 
-            <p><strong>Monetization:</strong> {data.monetization}</p>
-            <p><strong>Competition:</strong> {data.competition}</p>
+                <ul className="text-sm opacity-80 space-y-1">
+                  <li>✔ Exact traffic loopholes</li>
+                  <li>✔ Buyer communities</li>
+                  <li>✔ First $100 execution plan</li>
+                  <li>✔ Hidden monetization angle</li>
+                </ul>
 
-          </div>
+                <button
+                  onClick={()=>setUnlock(true)}
+                  className="mt-3 bg-white text-black px-4 py-2 rounded-lg"
+                >
+                  Unlock Deep Oracle
+                </button>
 
-        )}
+              </div>
 
-        {/* ---------- RADAR ---------- */}
+            )}
 
-        {(showReveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
+            {unlock && (
 
-          <div
-            key={i}
-            onClick={()=>deepScan(n.name,i)}
-            className="bg-zinc-900 p-6 rounded-xl space-y-2 cursor-pointer hover:bg-zinc-800"
-          >
+              <div className="bg-zinc-800 p-4 rounded-lg text-sm space-y-1">
 
-            <h2>🔥 {n.name}</h2>
-
-            <p>Score: {n.score}/100</p>
-
-            <p>{n.why_trending}</p>
-
-            {selected===i && (
-
-              <div className="mt-4 border-t border-zinc-700 pt-4 space-y-2">
-
-                {!deepData && <p>⚫ Shadow Oracle diving deeper...</p>}
-
-                {deepData && (
-
-                  <>
-                    <p><strong>Execution:</strong> {deepData.execution}</p>
-                    <p><strong>Users:</strong> {deepData.users}</p>
-                    <p><strong>Traffic:</strong> {deepData.traffic}</p>
-                    <p><strong>Monetization:</strong> {deepData.monetization}</p>
-                    <p><strong>Hidden angle:</strong> {deepData.hidden_angle}</p>
-                    <p><strong>Risk:</strong> {deepData.risk}</p>
-                  </>
-
-                )}
+                <p><strong>Day 1:</strong> {data.execution?.day1}</p>
+                <p><strong>Week 1:</strong> {data.execution?.week1}</p>
+                <p><strong>First revenue:</strong> {data.execution?.first_revenue}</p>
 
               </div>
 
@@ -295,7 +192,7 @@ export default function Home(){
 
           </div>
 
-        ))}
+        )}
 
       </div>
 
