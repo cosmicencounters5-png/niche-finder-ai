@@ -42,6 +42,9 @@ Best Opportunity:
 - Why this could realistically succeed:
 - Viral positioning angle:
 
+Most founders miss this:
+- One unexpected insight or warning related to the idea.
+
 Alternative Opportunities:
 1.
 2.
