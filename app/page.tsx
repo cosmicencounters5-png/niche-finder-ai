@@ -27,7 +27,6 @@ export default function Home() {
 
     const text = data.result;
 
-    // Extract score from AI response
     const match = text.match(/Hidden Niche Score:\s*(\d+)/i);
     if (match) {
       setScore(match[1]);
@@ -42,58 +41,56 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-12">
 
-      <h1 className="text-4xl font-bold mb-4">
-        Find Hidden Niches Instantly
-      </h1>
+      <div className="max-w-2xl w-full">
 
-      <p className="text-gray-500 mb-8 max-w-md">
-        Paste your startup idea and discover overlooked niche opportunities your competitors miss.
-      </p>
+        <h1 className="text-4xl font-bold mb-4 text-center">
+          Find Hidden Niches Instantly
+        </h1>
 
-      <textarea
-        placeholder="Describe your idea..."
-        className="w-full max-w-xl p-4 border rounded-lg mb-4"
-        rows={5}
-        value={idea}
-        onChange={(e) => setIdea(e.target.value)}
-      />
+        <p className="text-gray-500 mb-8 text-center">
+          Paste your startup idea and discover overlooked niche opportunities your competitors miss.
+        </p>
 
-      <button
-        className="bg-black text-white px-6 py-3 rounded-lg mb-4"
-        onClick={analyzeIdea}
-      >
-        {loading ? "Analyzing..." : "Find Hidden Niches"}
-      </button>
+        <textarea
+          placeholder="Describe your idea..."
+          className="w-full p-4 border rounded-lg mb-4 bg-white"
+          rows={4}
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+        />
 
-      {score && (
-        <div className="text-5xl font-bold mb-4">
-          {score}/100
-        </div>
-      )}
+        <button
+          className="w-full bg-black text-white px-6 py-3 rounded-lg mb-8"
+          onClick={analyzeIdea}
+        >
+          {loading ? "Analyzing..." : "Find Hidden Niches"}
+        </button>
 
-      {result && (
-        <>
-          <div className="mt-4 p-4 border rounded-lg max-w-xl whitespace-pre-wrap text-left">
-            {result}
+        {score && (
+          <div className="text-center text-5xl font-bold mb-6">
+            {score}/100
           </div>
+        )}
 
-          <button
-            className="mt-4 underline text-sm"
-            onClick={analyzeIdea}
-          >
-            Try another angle →
-          </button>
+        {result && (
+          <div className="bg-white border rounded-xl p-6 whitespace-pre-wrap leading-relaxed">
+            {result}
 
-          <button
-            className="mt-2 text-sm underline"
-            onClick={copyResult}
-          >
-            Copy result
-          </button>
-        </>
-      )}
+            <div className="flex gap-4 mt-6 text-sm">
+              <button onClick={analyzeIdea} className="underline">
+                Try another angle →
+              </button>
+
+              <button onClick={copyResult} className="underline">
+                Copy result
+              </button>
+            </div>
+          </div>
+        )}
+
+      </div>
 
     </main>
   );
