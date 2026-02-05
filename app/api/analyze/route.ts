@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const niche = body.niche;
 
     /* ===============================
-       🔥 DEEP ORACLE (CLICK NICHES)
+       ⚫ SHADOW DEEP ORACLE
     =============================== */
 
     if (deep) {
@@ -50,13 +50,15 @@ export async function POST(req: Request) {
           role:"user",
           content:`
 
-You are ORACLE MARKET GOD.
+You are SHADOW ORACLE.
+
+Analyze deeper market strategy.
 
 Niche:
 
 ${niche}
 
-Live market signals:
+Live signals:
 
 ${marketSignals.join("\n")}
 
@@ -83,7 +85,7 @@ Return STRICT JSON ONLY:
     }
 
     /* ===============================
-       🔥 ORACLE EVOLUTION X ENGINE
+       ⚫ ORACLE EVOLUTION X CORE
     =============================== */
 
     const subs = ["startups","Entrepreneur","sideproject","smallbusiness"];
@@ -116,9 +118,14 @@ Return STRICT JSON ONLY:
       ? `
 You are ORACLE EVOLUTION X.
 
-You DO NOT give generic advice.
+You think like an elite market analyst.
 
-You identify EXACT profitable sub-niches and hot products.
+You identify:
+
+- early-stage opportunities
+- hidden buyer signals
+- EXACT hot products to sell
+- realistic execution paths
 
 User idea:
 
@@ -128,10 +135,6 @@ Live market discussions:
 
 ${titles.join("\n")}
 
-VERY IMPORTANT:
-
-Break down WHAT TO SELL specifically.
-
 Return STRICT JSON ONLY:
 
 {
@@ -139,13 +142,18 @@ Return STRICT JSON ONLY:
 
  "name":"",
 
- "score":85,
+ "score":0,
 
- "success_probability":70,
- "time_to_first_sale":"7-14 days",
+ "success_probability":0,
+ "time_to_first_sale":"",
 
- "market_heat":"explosive",
- "buyer_intent":"high",
+ "market_heat":"",
+ "buyer_intent":"",
+
+ "trend_trajectory":{
+   "30_days":"",
+   "90_days":""
+ },
 
  "why_trending":"",
  "pain_signal":"",
@@ -171,11 +179,11 @@ Return STRICT JSON ONLY:
 
 `
       : `
-You are ORACLE TREND RADAR.
+You are SHADOW TREND RADAR.
 
-Find hidden niches from trending discussions.
+Detect emerging niches BEFORE mainstream adoption.
 
-Trending:
+Trending discussions:
 
 ${titles.join("\n")}
 
@@ -186,7 +194,7 @@ Return STRICT JSON ONLY:
  "niches":[
   {
    "name":"",
-   "score":80,
+   "score":0,
    "why_trending":"",
    "pain_signal":"",
    "hidden_signal":"",
@@ -200,14 +208,22 @@ Return STRICT JSON ONLY:
     const completion = await openai.chat.completions.create({
 
       model:"gpt-4o-mini",
+
       response_format:{ type:"json_object" },
+
       messages:[{ role:"user", content:prompt }]
 
     });
 
-    return Response.json(
-      JSON.parse(completion.choices[0].message.content!)
-    );
+    const content = completion.choices[0].message.content;
+
+    if(!content){
+
+      return Response.json({ error:"empty oracle response" });
+
+    }
+
+    return Response.json(JSON.parse(content));
 
   } catch(err){
 
