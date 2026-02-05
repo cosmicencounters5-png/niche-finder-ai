@@ -18,11 +18,10 @@ You are an elite startup strategist.
 You think like:
 - indie hackers
 - early adopters
-- product-market fit experts.
+- product-market fit experts
 
-Give insights that feel like insider intelligence.
+Your insights should feel like insider intelligence.
 Avoid generic startup advice.
-
 `,
       },
       {
@@ -43,13 +42,18 @@ Best Opportunity:
 - Viral positioning angle:
 
 Most founders miss this:
-- One unexpected insight or warning related to the idea.
+- One sharp, non-obvious insight or warning.
 
 Alternative Opportunities:
 1.
 2.
 
-Be bold and specific.
+Autopilot Ideas:
+1.
+2.
+3.
+
+Be bold, specific, and practical.
 `,
       },
     ],
