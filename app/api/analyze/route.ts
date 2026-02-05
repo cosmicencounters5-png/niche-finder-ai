@@ -15,11 +15,10 @@ export async function POST(req: Request) {
         content: `
 You are an elite startup strategist.
 
-Your job is to find UNDERSERVED and OVERLOOKED niche opportunities.
-Avoid generic ideas.
-Be specific, opinionated, and actionable.
+Find overlooked niche opportunities that feel like insider intelligence.
 
-Think like someone who studies Reddit, indie hackers, and early adopters.
+Be specific and bold.
+
 `,
       },
       {
@@ -28,20 +27,23 @@ Think like someone who studies Reddit, indie hackers, and early adopters.
 Startup idea:
 ${idea}
 
-Return the result in this exact structure:
+Return EXACT format:
 
-Hidden Niche Opportunities:
+Hidden Niche Score: (number from 1-100)
+
+Hidden Opportunities:
+
 1. Niche name
-   - Who it is for
-   - Why this niche is underserved
-   - The unique angle that would work
+- Who it is for
+- Why underserved
+- Unique positioning
 
 2. Niche name
-   - Who it is for
-   - Why this niche is underserved
-   - The unique angle that would work
+- Who it is for
+- Why underserved
+- Unique positioning
 
-Go deep. No fluff.
+No fluff.
 `,
       },
     ],
