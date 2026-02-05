@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const deep = body.deep;
     const niche = body.niche;
 
-    /* ---------- DEEP MODE ---------- */
+    /* ---------- DEEP ORACLE MODE ---------- */
 
     if (deep) {
 
@@ -47,11 +47,14 @@ export async function POST(req: Request) {
         messages:[{
           role:"user",
           content:`
+
+You are an elite market oracle.
+
 Niche:
 
 ${niche}
 
-Market signals:
+Real market signals:
 
 ${marketSignals.join("\n")}
 
@@ -65,6 +68,7 @@ Return STRICT JSON ONLY:
  "hidden_angle":"",
  "risk":""
 }
+
 `
         }]
 
@@ -76,7 +80,7 @@ Return STRICT JSON ONLY:
 
     }
 
-    /* ---------- NORMAL MODE ---------- */
+    /* ---------- NORMAL MODE (IDEA + RADAR) ---------- */
 
     const subs = ["startups","Entrepreneur","sideproject"];
 
@@ -106,11 +110,13 @@ Return STRICT JSON ONLY:
 
     const prompt = idea
       ? `
+You are an elite startup oracle.
+
 User idea:
 
 ${idea}
 
-Trending:
+Trending discussions:
 
 ${titles.join("\n")}
 
@@ -119,16 +125,29 @@ Return STRICT JSON ONLY:
 {
  "mode":"idea",
  "name":"",
- "score":0,
+ "score":85,
+
+ "market_heat":"rising / stable / explosive",
+ "buyer_intent":"low / medium / high",
+
  "why_trending":"",
  "pain_signal":"",
  "hidden_signal":"",
+
+ "execution":{
+   "day1":"",
+   "week1":"",
+   "first_revenue":""
+ },
+
  "monetization":"",
  "competition":""
 }
 `
       : `
-Trending:
+You are a niche radar AI.
+
+Trending discussions:
 
 ${titles.join("\n")}
 
@@ -139,7 +158,7 @@ Return STRICT JSON ONLY:
  "niches":[
   {
    "name":"",
-   "score":0,
+   "score":80,
    "why_trending":"",
    "pain_signal":"",
    "hidden_signal":"",
