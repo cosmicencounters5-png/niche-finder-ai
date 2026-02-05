@@ -7,19 +7,58 @@ const openai = new OpenAI({
 export async function POST(req:Request){
 
   const body = await req.json().catch(()=>({}));
-  const idea = body?.idea;
 
-  /* ---------- TREND FETCH ---------- */
+  const idea = body.idea;
+  const deep = body.deep;
+  const niche = body.niche;
 
-  const subs = [
-    "startups",
-    "Entrepreneur",
-    "sideproject",
-    "SaaS",
-    "ChatGPT"
-  ];
+  /* ---------- DEEP INTELLIGENCE MODE ---------- */
 
-  let titles:string[] = [];
+  if(deep){
+
+    const completion = await openai.chat.completions.create({
+
+      model:"gpt-4o-mini",
+
+      response_format:{ type:"json_object" },
+
+      messages:[{
+
+        role:"user",
+        content:`
+
+Niche:
+
+${niche}
+
+Generate deep execution intelligence.
+
+Return:
+
+{
+ "execution":"",
+ "users":"",
+ "traffic":"",
+ "monetization":"",
+ "hidden_angle":"",
+ "risk":""
+}
+`
+      }]
+
+    });
+
+    return Response.json(
+      JSON.parse(completion.choices[0].message.content!)
+    );
+
+  }
+
+  /* ---------- RADAR / IDEA MODE ---------- */
+
+  const subs = ["startups","Entrepreneur","sideproject","SaaS","ChatGPT"];
+
+  let titles:string[]=[];
 
   for(const sub of subs){
 
@@ -39,8 +78,6 @@ export async function POST(req:Request){
 
   }
 
-  /* ---------- PROMPT ---------- */
-
   const prompt = idea
   ? `
 User idea:
@@ -51,9 +88,7 @@ Trending signals:
 
 ${titles.join("\n")}
 
-Analyse the idea and find best niche angle.
-
-Return JSON:
+Return:
 
 {
  "mode":"idea",
@@ -71,9 +106,7 @@ Trending discussions:
 
 ${titles.join("\n")}
 
-Find 3 emerging niches.
-
-Return JSON:
+Return:
 
 {
  "mode":"radar",
