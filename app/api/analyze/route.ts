@@ -1,29 +1,177 @@
-const analyze = async () => {
+import OpenAI from "openai";
 
-  if(!idea) return;
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
-  setLoading(true);
+export async function POST(req: Request) {
 
-  try{
+  try {
 
-    const res = await fetch("/api/analyze",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ idea })
+    const body = await req.json().catch(()=>({}));
+
+    const idea = body.idea;
+    const deep = body.deep;
+    const niche = body.niche;
+
+    /* ---------- DEEP MODE ---------- */
+
+    if (deep) {
+
+      let marketSignals:string[] = [];
+
+      try {
+
+        const reddit = await fetch(
+          `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&limit=10`
+        );
+
+        const json = await reddit.json();
+
+        if (json?.data?.children) {
+
+          marketSignals = json.data.children.map(
+            (p:any)=>p.data.title
+          );
+
+        }
+
+      } catch {}
+
+      const completion = await openai.chat.completions.create({
+
+        model:"gpt-4o-mini",
+
+        response_format:{ type:"json_object" },
+
+        messages:[{
+          role:"user",
+          content:`
+Niche:
+
+${niche}
+
+Market signals:
+
+${marketSignals.join("\n")}
+
+Return STRICT JSON ONLY:
+
+{
+ "execution":"",
+ "users":"",
+ "traffic":"",
+ "monetization":"",
+ "hidden_angle":"",
+ "risk":""
+}
+`
+        }]
+
+      });
+
+      return Response.json(
+        JSON.parse(completion.choices[0].message.content!)
+      );
+
+    }
+
+    /* ---------- NORMAL MODE ---------- */
+
+    const subs = ["startups","Entrepreneur","sideproject"];
+
+    let titles:string[] = [];
+
+    for(const sub of subs){
+
+      try{
+
+        const reddit = await fetch(
+          `https://www.reddit.com/r/${sub}/hot.json?limit=6`
+        );
+
+        const json = await reddit.json();
+
+        if(json?.data?.children){
+
+          titles.push(
+            ...json.data.children.map((p:any)=>p.data.title)
+          );
+
+        }
+
+      }catch{}
+
+    }
+
+    const prompt = idea
+      ? `
+User idea:
+
+${idea}
+
+Trending:
+
+${titles.join("\n")}
+
+Return STRICT JSON ONLY:
+
+{
+ "mode":"idea",
+ "name":"",
+ "score":0,
+ "why_trending":"",
+ "pain_signal":"",
+ "hidden_signal":"",
+ "monetization":"",
+ "competition":""
+}
+`
+      : `
+Trending:
+
+${titles.join("\n")}
+
+Return STRICT JSON ONLY:
+
+{
+ "mode":"radar",
+ "niches":[
+  {
+   "name":"",
+   "score":0,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  }
+ ]
+}
+`;
+
+    const completion = await openai.chat.completions.create({
+
+      model:"gpt-4o-mini",
+
+      response_format:{ type:"json_object" },
+
+      messages:[{ role:"user", content:prompt }]
+
     });
 
-    const json = await res.json();
+    return Response.json(
+      JSON.parse(completion.choices[0].message.content!)
+    );
 
-    console.log("API RESPONSE:", json);
+  } catch(err){
 
-    setData(json);
+    console.log("ORACLE ERROR:", err);
 
-  }catch(err){
-
-    console.log("frontend error",err);
+    return Response.json({
+      error:"oracle failed"
+    });
 
   }
 
-  setLoading(false);
-
-};
+}
