@@ -18,6 +18,10 @@ const [uses,setUses]=useState(0);
 
 const [scanStep,setScanStep]=useState("");
 
+/* 🔥 OWNER MODE (UNLIMITED FOR YOU) */
+
+const [ownerMode,setOwnerMode]=useState(false);
+
 /* 🔥 ADDICTIVE STATES */
 
 const [liveUsers,setLiveUsers]=useState(12);
@@ -33,13 +37,15 @@ const trendingSearches = [
 "Notion templates selling now"
 ];
 
-/* ---------- OWNER MODE (UNLIMITED FOR YOU) ---------- */
-
-const ownerMode = true;
-
 /* ---------- INIT ---------- */
 
 useEffect(()=>{
+
+// OWNER CHECK (URL ?owner=1)
+const params = new URLSearchParams(window.location.search);
+if(params.get("owner")==="1"){
+setOwnerMode(true);
+}
 
 const savedUses = Number(localStorage.getItem("oraclex_uses")||0);
 setUses(savedUses);
@@ -48,10 +54,12 @@ if(localStorage.getItem("oraclex_unlock")==="true"){
 setUnlocked(true);
 }
 
+// fake live users
 setInterval(()=>{
 setLiveUsers(8 + Math.floor(Math.random()*15));
 },4000);
 
+// live feed
 setInterval(()=>{
 
 const random = trendingSearches[
@@ -131,9 +139,14 @@ body:JSON.stringify({ idea })
 const json=await res.json();
 setData(json);
 
+// owner gets unlimited (no count)
+if(!ownerMode){
+
 const newUses=uses+1;
 setUses(newUses);
 localStorage.setItem("oraclex_uses",String(newUses));
+
+}
 
 setTimeout(()=>{
 
@@ -194,9 +207,7 @@ window.location.href="https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
 
 };
 
-/* 🔥 OWNER BYPASS INCLUDED */
-
-const blueprintLocked = !ownerMode && !unlocked && uses>=3;
+const blueprintLocked=!ownerMode && !unlocked && uses>=3;
 
 /* ---------- UI ---------- */
 
@@ -212,9 +223,14 @@ return(
 🔥 {liveUsers} founders scanning opportunities right now
 </p>
 
+{/* owner hides limit */}
+{!ownerMode && (
+
 <p className="text-center text-xs opacity-60">
-{ownerMode ? "Owner unlimited mode active" : `${Math.max(0,3-uses)} free scans remaining`}
+{Math.max(0,3-uses)} free scans remaining
 </p>
+
+)}
 
 <textarea
 className="w-full p-4 bg-zinc-900 rounded-lg"
@@ -231,8 +247,6 @@ Analyze Idea
 Scan Emerging Niches
 </button>
 
-{/* LIVE FEED */}
-
 <div className="text-xs opacity-70 space-y-1">
 {liveFeed.map((f,i)=>(<p key={i}>🔥 Someone just scanned: {f}</p>))}
 </div>
@@ -242,8 +256,6 @@ Scan Emerging Niches
 ⚫ {scanStep}
 </div>
 )}
-
-{/* IDEA RESULT */}
 
 {(reveal && data?.mode==="idea") && (
 
@@ -264,10 +276,8 @@ style={{width:`${data.success_probability}%`}}/>
 {data.alternative_angles?.map((a:any,i:number)=>(
 
 <div key={i} className="bg-black/40 p-3 rounded">
-
 <p className="text-green-400">{a.name}</p>
 <p className="text-xs opacity-60">Difficulty: {a.difficulty}</p>
-
 </div>
 
 ))}
