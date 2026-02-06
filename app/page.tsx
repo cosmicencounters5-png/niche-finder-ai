@@ -16,7 +16,7 @@ export default function Home(){
 
   const [unlocked,setUnlocked]=useState(false);
 
-  // 🔥 FREE ATTEMPTS
+  // FREE ATTEMPTS
   const [uses,setUses]=useState(0);
 
   /* ---------- INIT ---------- */
@@ -27,18 +27,13 @@ export default function Home(){
     setUses(savedUses);
 
     const savedUnlock = localStorage.getItem("oraclex_unlock");
-
-    if(savedUnlock==="true"){
-      setUnlocked(true);
-    }
+    if(savedUnlock==="true") setUnlocked(true);
 
     const params = new URLSearchParams(window.location.search);
 
     if(params.get("unlock")==="true"){
-
       setUnlocked(true);
       localStorage.setItem("oraclex_unlock","true");
-
       window.history.replaceState({},document.title,"/");
     }
 
@@ -51,7 +46,6 @@ export default function Home(){
     "Tracking buyer intent patterns...",
     "Mapping competition gaps...",
     "Detecting hidden profit signals...",
-    "Calculating success probability...",
     "Oracle X intelligence ready."
   ];
 
@@ -64,9 +58,7 @@ export default function Home(){
       setScanStep(scanMessages[i]);
       i++;
 
-      if(i>=scanMessages.length){
-        clearInterval(interval);
-      }
+      if(i>=scanMessages.length) clearInterval(interval);
 
     },600);
 
@@ -86,9 +78,7 @@ export default function Home(){
       setTypedText(prev=>prev+data.name[i]);
       i++;
 
-      if(i>=data.name.length){
-        clearInterval(interval);
-      }
+      if(i>=data.name.length) clearInterval(interval);
 
     },25);
 
@@ -96,21 +86,7 @@ export default function Home(){
 
   },[data]);
 
-  /* ---------- DOPAMINE DELAY ---------- */
-
-  useEffect(()=>{
-
-    if(reveal){
-
-      setTimeout(()=>{
-        setShowBlueprint(true);
-      },700);
-
-    }
-
-  },[reveal]);
-
-  /* ---------- ANALYZE ---------- */
+  /* ---------- ANALYZE IDEA ---------- */
 
   const analyze=async()=>{
 
@@ -130,13 +106,36 @@ export default function Home(){
     });
 
     const json = await res.json();
-
     setData(json);
 
-    // 🔥 increase usage count
+    // increase free usage count
     const newUses = uses + 1;
     setUses(newUses);
     localStorage.setItem("oraclex_uses",String(newUses));
+
+    setTimeout(()=>{
+      setReveal(true);
+      setShowBlueprint(true);
+      setLoading(false);
+    },900);
+
+  };
+
+  /* ---------- SCAN RADAR (🔥 FIXED — NEVER REMOVE AGAIN) ---------- */
+
+  const radar=async()=>{
+
+    setLoading(true);
+    setReveal(false);
+    setShowBlueprint(false);
+    setData(null);
+
+    runScanAnimation();
+
+    const res=await fetch("/api/analyze",{ method:"POST" });
+
+    const json = await res.json();
+    setData(json);
 
     setTimeout(()=>{
       setReveal(true);
@@ -145,7 +144,7 @@ export default function Home(){
 
   };
 
-  /* ---------- STRIPE ---------- */
+  /* ---------- STRIPE PAYMENT ---------- */
 
   const unlockBlueprint = () => {
 
@@ -185,6 +184,14 @@ export default function Home(){
           Analyze Idea
         </button>
 
+        {/* 🔥 SCAN BUTTON NEVER DISAPPEARS AGAIN */}
+        <button
+          onClick={radar}
+          className="w-full border py-3 rounded-lg"
+        >
+          Scan Emerging Niches
+        </button>
+
         {loading && (
 
           <div className="bg-zinc-900 p-6 rounded-xl animate-pulse">
@@ -194,6 +201,8 @@ export default function Home(){
           </div>
 
         )}
+
+        {/* IDEA RESULT */}
 
         {(reveal && data?.mode==="idea") && (
 
@@ -246,6 +255,22 @@ export default function Home(){
           </div>
 
         )}
+
+        {/* RADAR RESULTS */}
+
+        {(reveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
+
+          <div key={i} className="bg-zinc-900 p-6 rounded-xl">
+
+            <h2 className="text-green-400">🔥 {n.name}</h2>
+
+            <p>Score: {n.score}/100</p>
+
+            <p>{n.why_trending}</p>
+
+          </div>
+
+        ))}
 
       </div>
 
