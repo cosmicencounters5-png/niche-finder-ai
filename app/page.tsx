@@ -33,6 +33,10 @@ const trendingSearches = [
 "Notion templates selling now"
 ];
 
+/* ---------- OWNER MODE (UNLIMITED FOR YOU) ---------- */
+
+const ownerMode = true;
+
 /* ---------- INIT ---------- */
 
 useEffect(()=>{
@@ -190,7 +194,9 @@ window.location.href="https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
 
 };
 
-const blueprintLocked=!unlocked && uses>=3;
+/* 🔥 OWNER BYPASS INCLUDED */
+
+const blueprintLocked = !ownerMode && !unlocked && uses>=3;
 
 /* ---------- UI ---------- */
 
@@ -207,7 +213,7 @@ return(
 </p>
 
 <p className="text-center text-xs opacity-60">
-{Math.max(0,3-uses)} free scans remaining
+{ownerMode ? "Owner unlimited mode active" : `${Math.max(0,3-uses)} free scans remaining`}
 </p>
 
 <textarea
@@ -254,8 +260,6 @@ Scan Emerging Niches
 style={{width:`${data.success_probability}%`}}/>
 </div>
 </div>
-
-{/* 🔥 ADDICTIVE MULTI RESULTS */}
 
 {data.alternative_angles?.map((a:any,i:number)=>(
 
