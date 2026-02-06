@@ -29,13 +29,13 @@ export async function POST(req: Request) {
           role:"user",
           content:`
 
-You are ORACLE X DEEP MARKET ANALYST.
+You are ORACLE X DEEP MARKET ANALYZER.
 
 Niche:
 
 ${niche}
 
-Return JSON:
+Return STRICT JSON:
 
 {
  "execution":"",
@@ -58,18 +58,76 @@ Return JSON:
     }
 
     /* ===============================
-       🔥 MAIN ENGINE
+       🔥 ORACLE X MAIN ENGINE
     =============================== */
 
     const prompt = idea
-    ? `Return JSON { "mode":"idea","name":"","first_product":"","price":"","where_to_sell":"","traffic_source":"" }`
-    : `Return JSON {
+      ? `
+You are ORACLE X.
+
+You identify HIGHLY profitable opportunities.
+
+User idea:
+
+${idea}
+
+Return STRICT JSON:
+
+{
+ "mode":"idea",
+ "name":"",
+ "score":85,
+ "success_probability":70,
+
+ "hot_products":[
+   {
+     "name":"",
+     "why_hot":"",
+     "difficulty":"low/medium/high"
+   },
+   {
+     "name":"",
+     "why_hot":"",
+     "difficulty":"low/medium/high"
+   },
+   {
+     "name":"",
+     "why_hot":"",
+     "difficulty":"low/medium/high"
+   }
+ ],
+
+ "first_product":"",
+ "price":"",
+ "where_to_sell":"",
+ "traffic_source":""
+}
+
+`
+      : `
+You are ORACLE X TREND RADAR.
+
+Return EXACTLY 6 HIGHLY DIFFERENT emerging niches.
+
+Each niche must target a DIFFERENT audience or problem.
+
+Return STRICT JSON:
+
+{
  "mode":"radar",
  "niches":[
-  { "name":"AI cold outreach automation","score":92,"why_trending":"AI automation exploding" },
-  { "name":"Local AI lead gen","score":95,"why_trending":"Local business AI demand rising" }
+  {
+   "name":"",
+   "score":80,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  }
  ]
-}`;
+}
+`;
 
     const completion = await openai.chat.completions.create({
 
@@ -85,13 +143,10 @@ Return JSON:
 
   } catch(err){
 
-    console.log("ORACLE X ERROR:", err);
+    console.log("ORACLE ERROR:", err);
 
     return Response.json({
-      mode:"radar",
-      niches:[
-        { name:"Fallback niche","score":80,"why_trending":"backup data" }
-      ]
+      error:"oracle failed"
     });
 
   }
