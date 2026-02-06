@@ -14,7 +14,6 @@ export default function Home(){
   const [typedText,setTypedText]=useState("");
   const [showBlueprint,setShowBlueprint]=useState(false);
 
-  // 🔥 PAYMENT STATE
   const [unlocked,setUnlocked]=useState(false);
 
   /* ---------- AUTO UNLOCK AFTER STRIPE ---------- */
@@ -26,17 +25,12 @@ export default function Home(){
     if(params.get("unlock")==="true"){
 
       setUnlocked(true);
-
       localStorage.setItem("oraclex_unlock","true");
-
-      // remove query param from url
       window.history.replaceState({},document.title,"/");
 
     }
 
-    const saved = localStorage.getItem("oraclex_unlock");
-
-    if(saved==="true"){
+    if(localStorage.getItem("oraclex_unlock")==="true"){
 
       setUnlocked(true);
 
@@ -44,7 +38,7 @@ export default function Home(){
 
   },[]);
 
-  /* ---------- ORACLE X SCAN FEED ---------- */
+  /* ---------- SCAN FEED ---------- */
 
   const scanMessages = [
     "Oracle X scanning live market signals...",
@@ -174,6 +168,28 @@ export default function Home(){
 
   };
 
+  /* ---------- SHARE FUNCTIONS ---------- */
+
+  const shareText = () => {
+
+    const text = `Oracle X predicted a ${data.score}/100 opportunity with ${data.success_probability}% success probability. Found this early using Oracle X.`;
+
+    navigator.clipboard.writeText(text);
+
+    alert("Copied — share it 😈");
+
+  };
+
+  const shareTwitter = () => {
+
+    const text = encodeURIComponent(
+      `Oracle X predicted a ${data.score}/100 opportunity before it trends 🔥`
+    );
+
+    window.open(`https://twitter.com/intent/tweet?text=${text}`);
+
+  };
+
   /* ---------- UI ---------- */
 
   return(
@@ -197,64 +213,37 @@ export default function Home(){
           onChange={(e)=>setIdea(e.target.value)}
         />
 
-        <button
-          onClick={analyze}
-          className="w-full bg-white text-black py-3 rounded-lg hover:scale-[1.02] transition"
-        >
+        <button onClick={analyze} className="w-full bg-white text-black py-3 rounded-lg">
           Analyze Idea
         </button>
 
-        <button
-          onClick={radar}
-          className="w-full border py-3 rounded-lg hover:bg-zinc-900 transition"
-        >
+        <button onClick={radar} className="w-full border py-3 rounded-lg">
           Scan Emerging Niches
         </button>
 
         {loading && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl text-sm font-mono animate-pulse border border-green-500/20">
-
+          <div className="bg-zinc-900 p-6 rounded-xl text-sm animate-pulse">
             ⚫ {scanStep}
-
           </div>
 
         )}
 
         {(reveal && data?.mode==="idea") && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl space-y-4 border border-green-500/20 shadow-lg shadow-green-900/20">
+          <div className="bg-zinc-900 p-6 rounded-xl space-y-4 border border-green-500/20">
 
-            <h2 className="text-xl font-semibold text-green-400">
-              🔥 {typedText}
-            </h2>
+            <h2 className="text-xl text-green-400">🔥 {typedText}</h2>
 
             <p>Opportunity Score: {data.score}/100</p>
 
-            <div>
-
-              <p>🔥 Success Probability: {data.success_probability}%</p>
-
-              <div className="w-full h-3 bg-zinc-800 rounded overflow-hidden">
-
-                <div
-                  className="h-3 bg-green-500 rounded transition-all duration-1000"
-                  style={{ width:`${data.success_probability}%` }}
-                />
-
-              </div>
-
-            </div>
+            <p>🔥 Success Probability: {data.success_probability}%</p>
 
             {showBlueprint && (
 
               unlocked ? (
 
-                <div className="border-t border-zinc-700 pt-4 space-y-2 animate-pulse">
-
-                  <h3 className="font-semibold text-lg text-green-400">
-                    💰 First Money Blueprint
-                  </h3>
+                <div className="border-t border-zinc-700 pt-4">
 
                   <p><strong>Product:</strong> {data.first_product}</p>
                   <p><strong>Price:</strong> {data.price}</p>
@@ -265,16 +254,11 @@ export default function Home(){
 
               ) : (
 
-                <div className="border-t border-zinc-700 pt-4 space-y-3">
+                <div className="border-t border-zinc-700 pt-4">
 
-                  <p className="opacity-60">
-                    🔒 Monetization Blueprint locked
-                  </p>
+                  <p>🔒 Monetization Blueprint locked</p>
 
-                  <button
-                    onClick={unlockBlueprint}
-                    className="w-full bg-green-500 text-black py-3 rounded-lg font-semibold hover:scale-[1.02] transition"
-                  >
+                  <button onClick={unlockBlueprint} className="w-full bg-green-500 text-black py-3 rounded-lg">
                     Unlock Revenue Plan ⚡
                   </button>
 
@@ -283,6 +267,22 @@ export default function Home(){
               )
 
             )}
+
+            {/* 🔥 VIRAL SHARE */}
+
+            <div className="border-t border-zinc-700 pt-4 space-y-2">
+
+              <p className="text-xs opacity-60">Share your prediction</p>
+
+              <button onClick={shareText} className="w-full border py-2 rounded-lg">
+                Copy Result
+              </button>
+
+              <button onClick={shareTwitter} className="w-full border py-2 rounded-lg">
+                Share on X
+              </button>
+
+            </div>
 
           </div>
 
