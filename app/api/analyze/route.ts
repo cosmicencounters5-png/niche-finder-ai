@@ -14,7 +14,9 @@ export async function POST(req: Request) {
     const deep = body.deep;
     const niche = body.niche;
 
-    /* ---------- DEEP ORACLE ---------- */
+    /* =====================================================
+       🔥 DEEP ORACLE (CLICK NICHE FOR DETAILS)
+    ===================================================== */
 
     if(deep){
 
@@ -29,11 +31,12 @@ export async function POST(req: Request) {
 
 You are Oracle X Deep Analyzer.
 
-Niche:
+Analyze this niche deeply and give ACTIONABLE execution.
 
+Niche:
 ${niche}
 
-Return JSON:
+Return STRICT JSON:
 
 {
  "execution":"",
@@ -52,20 +55,27 @@ Return JSON:
       return Response.json(
         JSON.parse(completion.choices[0].message.content!)
       );
-
     }
 
-    /* ---------- MAIN ORACLE ---------- */
+    /* =====================================================
+       🔥 MAIN ORACLE X ENGINE (ADDICTIVE MODE)
+    ===================================================== */
 
     const prompt = idea
       ? `
-You are Oracle X addictive business analyzer.
+You are ORACLE X — elite startup intelligence.
+
+RULES:
+
+- NEVER give generic advice.
+- Provide VERY SPECIFIC monetization ideas.
+- ALWAYS generate MULTIPLE angles.
+- Each angle must feel DIFFERENT.
+- Include clear execution steps.
 
 User idea:
 
 ${idea}
-
-Return MULTIPLE opportunities.
 
 Return STRICT JSON:
 
@@ -78,9 +88,39 @@ Return STRICT JSON:
  "success_probability":70,
 
  "alternative_angles":[
-   { "name":"", "difficulty":"low/medium/high" },
-   { "name":"", "difficulty":"low/medium/high" },
-   { "name":"", "difficulty":"low/medium/high" }
+   {
+     "name":"",
+     "difficulty":"low/medium/high",
+     "execution_plan":{
+       "day1":"",
+       "week1":"",
+       "first_money":"",
+       "growth_lever":""
+     },
+     "hidden_opportunity":""
+   },
+   {
+     "name":"",
+     "difficulty":"low/medium/high",
+     "execution_plan":{
+       "day1":"",
+       "week1":"",
+       "first_money":"",
+       "growth_lever":""
+     },
+     "hidden_opportunity":""
+   },
+   {
+     "name":"",
+     "difficulty":"low/medium/high",
+     "execution_plan":{
+       "day1":"",
+       "week1":"",
+       "first_money":"",
+       "growth_lever":""
+     },
+     "hidden_opportunity":""
+   }
  ],
 
  "hot_products":[
@@ -98,13 +138,58 @@ Return STRICT JSON:
       : `
 You are Oracle X Trend Radar.
 
-Return EXACTLY 6 VERY DIFFERENT niches.
+Return EXACTLY 6 VERY DIFFERENT emerging niches.
 
-Return JSON:
+Return STRICT JSON:
 
 {
  "mode":"radar",
  "niches":[
+  {
+   "name":"",
+   "score":80,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  },
+  {
+   "name":"",
+   "score":80,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  },
+  {
+   "name":"",
+   "score":80,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  },
+  {
+   "name":"",
+   "score":80,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  },
+  {
+   "name":"",
+   "score":80,
+   "why_trending":"",
+   "pain_signal":"",
+   "hidden_signal":"",
+   "monetization":"",
+   "competition":""
+  },
   {
    "name":"",
    "score":80,
