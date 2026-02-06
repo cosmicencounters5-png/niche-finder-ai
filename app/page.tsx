@@ -18,7 +18,7 @@ const [uses,setUses]=useState(0);
 
 const [scanStep,setScanStep]=useState("");
 
-/* 🔥 ADDICTIVE UI STATES */
+/* 🔥 ADDICTIVE STATES */
 
 const [liveUsers,setLiveUsers]=useState(12);
 const [liveFeed,setLiveFeed]=useState<string[]>([]);
@@ -44,13 +44,9 @@ if(localStorage.getItem("oraclex_unlock")==="true"){
 setUnlocked(true);
 }
 
-/* 🔥 fake live users */
-
 setInterval(()=>{
 setLiveUsers(8 + Math.floor(Math.random()*15));
 },4000);
-
-/* 🔥 live feed */
 
 setInterval(()=>{
 
@@ -229,26 +225,16 @@ Analyze Idea
 Scan Emerging Niches
 </button>
 
-{/* 🔥 LIVE MARKET FEED */}
+{/* LIVE FEED */}
 
 <div className="text-xs opacity-70 space-y-1">
-
-{liveFeed.map((f,i)=>(
-
-<p key={i}>🔥 Someone just scanned: {f}</p>
-
-))}
-
+{liveFeed.map((f,i)=>(<p key={i}>🔥 Someone just scanned: {f}</p>))}
 </div>
 
 {loading && (
-
 <div className="bg-zinc-900 p-6 rounded-xl animate-pulse">
-
 ⚫ {scanStep}
-
 </div>
-
 )}
 
 {/* IDEA RESULT */}
@@ -261,20 +247,26 @@ Scan Emerging Niches
 
 <p>Opportunity Score: {data.score}/100</p>
 
-{/* 🔥 PROFITABILITY BAR RESTORED */}
-
 <div>
-
 <p>🔥 Profitability Index</p>
-
 <div className="w-full h-3 bg-zinc-800 rounded">
-
 <div className="h-3 bg-green-500"
 style={{width:`${data.success_probability}%`}}/>
+</div>
+</div>
+
+{/* 🔥 ADDICTIVE MULTI RESULTS */}
+
+{data.alternative_angles?.map((a:any,i:number)=>(
+
+<div key={i} className="bg-black/40 p-3 rounded">
+
+<p className="text-green-400">{a.name}</p>
+<p className="text-xs opacity-60">Difficulty: {a.difficulty}</p>
 
 </div>
 
-</div>
+))}
 
 {blueprintLocked ? (
 
@@ -307,45 +299,6 @@ Unlock Revenue Plan ⚡
 </div>
 
 )}
-
-{/* RADAR */}
-
-{(reveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
-
-<div key={i}
-onClick={()=>deepScan(n.name,i)}
-className="bg-zinc-900 p-6 rounded-xl cursor-pointer hover:bg-zinc-800">
-
-<h2 className="text-green-400">🔥 {n.name}</h2>
-
-<p>Score: {n.score}/100</p>
-
-<p>{n.why_trending}</p>
-
-{selected===i && (
-
-<div className="mt-4 border-t pt-4">
-
-{!deepData && <p>Oracle X deep scanning...</p>}
-
-{deepData && (
-
-<>
-<p>Execution: {deepData.execution}</p>
-<p>Users: {deepData.users}</p>
-<p>Traffic: {deepData.traffic}</p>
-<p>Monetization: {deepData.monetization}</p>
-</>
-
-)}
-
-</div>
-
-)}
-
-</div>
-
-))}
 
 </div>
 
