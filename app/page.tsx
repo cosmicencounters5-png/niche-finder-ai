@@ -16,7 +16,19 @@ export default function Home(){
 
   const [unlocked,setUnlocked]=useState(false);
 
-  /* ---------- AUTO UNLOCK AFTER STRIPE ---------- */
+  // 🔥 FAKE LIVE USERS
+  const [liveUsers,setLiveUsers]=useState(12);
+
+  // 🔥 RECENT FEED
+  const recentScans = [
+    "AI cold email automation",
+    "Faceless YouTube channels",
+    "TikTok digital products",
+    "Shopify micro niche tools",
+    "Local lead generation AI"
+  ];
+
+  /* ---------- AUTO UNLOCK ---------- */
 
   useEffect(()=>{
 
@@ -31,6 +43,25 @@ export default function Home(){
     if(localStorage.getItem("oraclex_unlock")==="true"){
       setUnlocked(true);
     }
+
+  },[]);
+
+  /* ---------- LIVE USERS COUNTER ---------- */
+
+  useEffect(()=>{
+
+    const interval = setInterval(()=>{
+
+      setLiveUsers(prev => {
+
+        const change = Math.floor(Math.random()*3)-1;
+        return Math.max(8, prev + change);
+
+      });
+
+    },3000);
+
+    return ()=>clearInterval(interval);
 
   },[]);
 
@@ -132,42 +163,24 @@ export default function Home(){
 
   };
 
-  /* ---------- STRIPE ---------- */
-
   const unlockBlueprint = () => {
 
     window.location.href = "https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
 
   };
 
-  /* ---------- VIRAL SHARE ---------- */
-
-  const shareTwitter = () => {
-
-    const text = encodeURIComponent(
-      `Oracle X predicted a ${data.score}/100 opportunity before it trends 🔥`
-    );
-
-    window.open(`https://twitter.com/intent/tweet?text=${text}`);
-
-  };
-
-  /* ---------- REDDIT DOMINATION MODE ---------- */
-
   const launchReddit = () => {
 
     const title = encodeURIComponent(
-      `I built an AI that predicts profitable niches before they trend — got ${data.score}/100 score`
+      `I built an AI that predicts profitable niches before they trend`
     );
 
     const body = encodeURIComponent(
-`Been experimenting with Oracle X — an AI that scans market signals and predicts early opportunities.
+`Oracle X just scored my idea ${data.score}/100.
 
-My idea scored ${data.score}/100 with ${data.success_probability}% success probability.
+Curious what founders think.
 
-Curious what you think.
-
-👉 ${window.location.href}`
+${window.location.href}`
     );
 
     window.open(
@@ -175,8 +188,6 @@ Curious what you think.
     );
 
   };
-
-  /* ---------- UI ---------- */
 
   return(
 
@@ -187,6 +198,11 @@ Curious what you think.
         <h1 className="text-3xl font-bold text-center">
           ⚫ Oracle X
         </h1>
+
+        {/* LIVE SOCIAL PROOF */}
+        <p className="text-center text-xs text-green-400 animate-pulse">
+          🔥 {liveUsers} founders scanning opportunities right now
+        </p>
 
         <textarea
           className="w-full p-4 bg-zinc-900 rounded-lg"
@@ -215,8 +231,6 @@ Curious what you think.
 
             <p>Opportunity Score: {data.score}/100</p>
 
-            <p>🔥 Success Probability: {data.success_probability}%</p>
-
             {showBlueprint && (
 
               unlocked ? (
@@ -232,33 +246,48 @@ Curious what you think.
 
               ) : (
 
-                <button onClick={unlockBlueprint} className="w-full bg-green-500 text-black py-3 rounded-lg">
-                  Unlock Revenue Plan ⚡
-                </button>
+                <div className="space-y-3">
+
+                  <p className="text-sm opacity-70">
+                    🔒 Monetization Blueprint locked
+                  </p>
+
+                  <button
+                    onClick={unlockBlueprint}
+                    className="w-full bg-green-500 text-black py-3 rounded-lg"
+                  >
+                    Unlock Revenue Plan ⚡
+                  </button>
+
+                  <p className="text-xs text-red-400">
+                    ⚠ Early access price ending soon
+                  </p>
+
+                </div>
 
               )
 
             )}
 
-            {/* 🔥 REDDIT VIRAL ENGINE */}
-
-            <button
-              onClick={launchReddit}
-              className="w-full border py-3 rounded-lg hover:bg-zinc-800"
-            >
+            <button onClick={launchReddit} className="w-full border py-3 rounded-lg">
               🚀 Launch this on Reddit
-            </button>
-
-            <button
-              onClick={shareTwitter}
-              className="w-full border py-3 rounded-lg hover:bg-zinc-800"
-            >
-              Share on X
             </button>
 
           </div>
 
         )}
+
+        {/* FOMO FEED */}
+
+        <div className="text-xs opacity-50 space-y-1">
+
+          {recentScans.map((s,i)=>(
+
+            <p key={i}>🔥 Someone just scanned: {s}</p>
+
+          ))}
+
+        </div>
 
       </div>
 
