@@ -7,8 +7,6 @@ export default function Home(){
   const [idea,setIdea]=useState("");
   const [loading,setLoading]=useState(false);
   const [data,setData]=useState<any>(null);
-  const [deepData,setDeepData]=useState<any>(null);
-  const [selected,setSelected]=useState<number|null>(null);
 
   const [scanStep,setScanStep]=useState("");
   const [reveal,setReveal]=useState(false);
@@ -18,6 +16,33 @@ export default function Home(){
 
   // 🔥 PAYMENT STATE
   const [unlocked,setUnlocked]=useState(false);
+
+  /* ---------- AUTO UNLOCK AFTER STRIPE ---------- */
+
+  useEffect(()=>{
+
+    const params = new URLSearchParams(window.location.search);
+
+    if(params.get("unlock")==="true"){
+
+      setUnlocked(true);
+
+      localStorage.setItem("oraclex_unlock","true");
+
+      // remove query param from url
+      window.history.replaceState({},document.title,"/");
+
+    }
+
+    const saved = localStorage.getItem("oraclex_unlock");
+
+    if(saved==="true"){
+
+      setUnlocked(true);
+
+    }
+
+  },[]);
 
   /* ---------- ORACLE X SCAN FEED ---------- */
 
@@ -97,7 +122,6 @@ export default function Home(){
     setReveal(false);
     setShowBlueprint(false);
     setData(null);
-    setSelected(null);
 
     runScanAnimation();
 
@@ -126,7 +150,6 @@ export default function Home(){
     setReveal(false);
     setShowBlueprint(false);
     setData(null);
-    setSelected(null);
 
     runScanAnimation();
 
@@ -147,7 +170,6 @@ export default function Home(){
 
   const unlockBlueprint = () => {
 
-    // 🔥 REPLACE WITH YOUR STRIPE PAYMENT LINK
     window.location.href = "https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
 
   };
@@ -224,13 +246,11 @@ export default function Home(){
 
             </div>
 
-            {/* 🔥 LOCKED REVENUE SECTION */}
-
             {showBlueprint && (
 
               unlocked ? (
 
-                <div className="border-t border-zinc-700 pt-4 space-y-2">
+                <div className="border-t border-zinc-700 pt-4 space-y-2 animate-pulse">
 
                   <h3 className="font-semibold text-lg text-green-400">
                     💰 First Money Blueprint
