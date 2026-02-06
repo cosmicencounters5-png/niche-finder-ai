@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "Oracle Evolution X",
@@ -27,10 +28,11 @@ export default function RootLayout({
 
         {/* Main app */}
         <div className="relative z-10">
-
           {children}
-
         </div>
+
+        {/* 🔥 VERCEL ANALYTICS (LIVE VISITOR TRACKING) */}
+        <Analytics />
 
       </body>
 
