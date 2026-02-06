@@ -15,14 +15,11 @@ const [typedText,setTypedText]=useState("");
 
 const [unlocked,setUnlocked]=useState(false);
 const [uses,setUses]=useState(0);
+const [ownerMode,setOwnerMode]=useState(false);
 
 const [scanStep,setScanStep]=useState("");
 
-/* 🔥 OWNER MODE (UNLIMITED FOR YOU) */
-
-const [ownerMode,setOwnerMode]=useState(false);
-
-/* 🔥 ADDICTIVE STATES */
+/* ADDICTIVE STATES */
 
 const [liveUsers,setLiveUsers]=useState(12);
 const [liveFeed,setLiveFeed]=useState<string[]>([]);
@@ -37,11 +34,10 @@ const trendingSearches = [
 "Notion templates selling now"
 ];
 
-/* ---------- INIT ---------- */
+/* INIT */
 
 useEffect(()=>{
 
-// OWNER CHECK (URL ?owner=1)
 const params = new URLSearchParams(window.location.search);
 if(params.get("owner")==="1"){
 setOwnerMode(true);
@@ -54,12 +50,10 @@ if(localStorage.getItem("oraclex_unlock")==="true"){
 setUnlocked(true);
 }
 
-// fake live users
 setInterval(()=>{
 setLiveUsers(8 + Math.floor(Math.random()*15));
 },4000);
 
-// live feed
 setInterval(()=>{
 
 const random = trendingSearches[
@@ -72,7 +66,7 @@ setLiveFeed(prev=>[random,...prev.slice(0,4)]);
 
 },[]);
 
-/* ---------- TYPEWRITER ---------- */
+/* TYPEWRITER */
 
 useEffect(()=>{
 
@@ -83,7 +77,10 @@ setTypedText("");
 
 const interval=setInterval(()=>{
 
+if(data.name[i]){
 setTypedText(prev=>prev+data.name[i]);
+}
+
 i++;
 
 if(i>=data.name.length) clearInterval(interval);
@@ -94,7 +91,7 @@ return ()=>clearInterval(interval);
 
 },[data]);
 
-/* ---------- SCAN ANIMATION ---------- */
+/* SCAN ANIMATION */
 
 const scanMessages=[
 "Oracle X scanning live signals...",
@@ -118,7 +115,7 @@ if(i>=scanMessages.length) clearInterval(interval);
 
 };
 
-/* ---------- ANALYZE ---------- */
+/* ANALYZE */
 
 const analyze=async()=>{
 
@@ -139,25 +136,20 @@ body:JSON.stringify({ idea })
 const json=await res.json();
 setData(json);
 
-// owner gets unlimited (no count)
 if(!ownerMode){
-
 const newUses=uses+1;
 setUses(newUses);
 localStorage.setItem("oraclex_uses",String(newUses));
-
 }
 
 setTimeout(()=>{
-
 setReveal(true);
 setLoading(false);
-
 },900);
 
 };
 
-/* ---------- RADAR ---------- */
+/* RADAR */
 
 const radar=async()=>{
 
@@ -174,15 +166,13 @@ const json=await res.json();
 setData(json);
 
 setTimeout(()=>{
-
 setReveal(true);
 setLoading(false);
-
 },900);
 
 };
 
-/* ---------- DEEP SCAN ---------- */
+/* DEEP SCAN */
 
 const deepScan=async(niche:string,index:number)=>{
 
@@ -199,17 +189,15 @@ setDeepData(await res.json());
 
 };
 
-/* ---------- PAYMENT ---------- */
+/* PAYMENT */
 
 const unlockBlueprint=()=>{
-
 window.location.href="https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
-
 };
 
 const blueprintLocked=!ownerMode && !unlocked && uses>=3;
 
-/* ---------- UI ---------- */
+/* UI */
 
 return(
 
@@ -223,13 +211,10 @@ return(
 🔥 {liveUsers} founders scanning opportunities right now
 </p>
 
-{/* owner hides limit */}
 {!ownerMode && (
-
 <p className="text-center text-xs opacity-60">
 {Math.max(0,3-uses)} free scans remaining
 </p>
-
 )}
 
 <textarea
@@ -247,6 +232,8 @@ Analyze Idea
 Scan Emerging Niches
 </button>
 
+{/* LIVE FEED */}
+
 <div className="text-xs opacity-70 space-y-1">
 {liveFeed.map((f,i)=>(<p key={i}>🔥 Someone just scanned: {f}</p>))}
 </div>
@@ -256,6 +243,8 @@ Scan Emerging Niches
 ⚫ {scanStep}
 </div>
 )}
+
+{/* IDEA RESULT */}
 
 {(reveal && data?.mode==="idea") && (
 
@@ -313,6 +302,45 @@ Unlock Revenue Plan ⚡
 </div>
 
 )}
+
+{/* RADAR RESULTS */}
+
+{(reveal && data?.mode==="radar") && data.niches?.map((n:any,i:number)=>(
+
+<div key={i}
+onClick={()=>deepScan(n.name,i)}
+className="bg-zinc-900 p-6 rounded-xl cursor-pointer hover:bg-zinc-800">
+
+<h2 className="text-green-400">🔥 {n.name}</h2>
+
+<p>Score: {n.score}/100</p>
+
+<p>{n.why_trending}</p>
+
+{selected===i && (
+
+<div className="mt-4 border-t pt-4">
+
+{!deepData && <p>Oracle X deep scanning...</p>}
+
+{deepData && (
+
+<>
+<p>Execution: {deepData.execution}</p>
+<p>Users: {deepData.users}</p>
+<p>Traffic: {deepData.traffic}</p>
+<p>Monetization: {deepData.monetization}</p>
+</>
+
+)}
+
+</div>
+
+)}
+
+</div>
+
+))}
 
 </div>
 
