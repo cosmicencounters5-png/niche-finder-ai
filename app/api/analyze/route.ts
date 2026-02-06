@@ -23,6 +23,11 @@ export async function POST(req: Request) {
       const completion = await openai.chat.completions.create({
 
         model:"gpt-4o-mini",
+
+        // 🔥 IMPORTANT (prevents identical results)
+        temperature:1.1,
+        top_p:0.95,
+
         response_format:{ type:"json_object" },
 
         messages:[{
@@ -206,14 +211,23 @@ Return STRICT JSON:
     const completion = await openai.chat.completions.create({
 
       model:"gpt-4o-mini",
+
+      // 🔥 THIS FIXES SAME RESULT ISSUE
+      temperature:1.1,
+      top_p:0.95,
+
       response_format:{ type:"json_object" },
+
       messages:[{ role:"user", content:prompt }]
 
     });
 
-    return Response.json(
-      JSON.parse(completion.choices[0].message.content!)
-    );
+    const parsed = JSON.parse(completion.choices[0].message.content!);
+
+    // 🔥 SAFETY FIX (prevents undefined UI issues)
+    parsed.name = parsed.name || idea || "Opportunity";
+
+    return Response.json(parsed);
 
   } catch(err){
 
