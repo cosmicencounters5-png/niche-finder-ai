@@ -18,6 +18,21 @@ const [uses,setUses]=useState(0);
 
 const [scanStep,setScanStep]=useState("");
 
+/* 🔥 ADDICTIVE UI STATES */
+
+const [liveUsers,setLiveUsers]=useState(12);
+const [liveFeed,setLiveFeed]=useState<string[]>([]);
+
+const trendingSearches = [
+"AI cold email automation",
+"Faceless TikTok channels",
+"Shopify micro niche tools",
+"Local lead generation AI",
+"Digital product bundles",
+"AI freelancers",
+"Notion templates selling now"
+];
+
 /* ---------- INIT ---------- */
 
 useEffect(()=>{
@@ -28,6 +43,24 @@ setUses(savedUses);
 if(localStorage.getItem("oraclex_unlock")==="true"){
 setUnlocked(true);
 }
+
+/* 🔥 fake live users */
+
+setInterval(()=>{
+setLiveUsers(8 + Math.floor(Math.random()*15));
+},4000);
+
+/* 🔥 live feed */
+
+setInterval(()=>{
+
+const random = trendingSearches[
+Math.floor(Math.random()*trendingSearches.length)
+];
+
+setLiveFeed(prev=>[random,...prev.slice(0,4)]);
+
+},2500);
 
 },[]);
 
@@ -173,6 +206,10 @@ return(
 
 <h1 className="text-3xl font-bold text-center">⚫ Oracle X</h1>
 
+<p className="text-center text-green-400 text-sm">
+🔥 {liveUsers} founders scanning opportunities right now
+</p>
+
 <p className="text-center text-xs opacity-60">
 {Math.max(0,3-uses)} free scans remaining
 </p>
@@ -191,6 +228,18 @@ Analyze Idea
 <button onClick={radar} className="w-full border py-3 rounded-lg">
 Scan Emerging Niches
 </button>
+
+{/* 🔥 LIVE MARKET FEED */}
+
+<div className="text-xs opacity-70 space-y-1">
+
+{liveFeed.map((f,i)=>(
+
+<p key={i}>🔥 Someone just scanned: {f}</p>
+
+))}
+
+</div>
 
 {loading && (
 
@@ -212,13 +261,16 @@ Scan Emerging Niches
 
 <p>Opportunity Score: {data.score}/100</p>
 
+{/* 🔥 PROFITABILITY BAR RESTORED */}
+
 <div>
 
-<p>🔥 Success Probability: {data.success_probability}%</p>
+<p>🔥 Profitability Index</p>
 
 <div className="w-full h-3 bg-zinc-800 rounded">
 
-<div className="h-3 bg-green-500" style={{width:`${data.success_probability}%`}}/>
+<div className="h-3 bg-green-500"
+style={{width:`${data.success_probability}%`}}/>
 
 </div>
 
