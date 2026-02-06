@@ -1,104 +1,304 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home(){
 
-  const [idea,setIdea]=useState("");
-  const [data,setData]=useState<any>(null);
-  const [loading,setLoading]=useState(false);
+const [idea,setIdea]=useState("");
+const [data,setData]=useState<any>(null);
+const [deepData,setDeepData]=useState<any>(null);
+const [selected,setSelected]=useState<number|null>(null);
 
-  const [selected,setSelected]=useState<number|null>(null);
-  const [deepData,setDeepData]=useState<any>(null);
+const [loading,setLoading]=useState(false);
+const [reveal,setReveal]=useState(false);
+const [typedText,setTypedText]=useState("");
 
-  const analyze=async()=>{
+const [unlocked,setUnlocked]=useState(false);
+const [uses,setUses]=useState(0);
 
-    setLoading(true);
+const [scanStep,setScanStep]=useState("");
 
-    const res=await fetch("/api/analyze",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ idea })
-    });
+/* ---------- INIT ---------- */
 
-    setData(await res.json());
-    setLoading(false);
+useEffect(()=>{
 
-  };
+const savedUses = Number(localStorage.getItem("oraclex_uses")||0);
+setUses(savedUses);
 
-  const radar=async()=>{
+if(localStorage.getItem("oraclex_unlock")==="true"){
+setUnlocked(true);
+}
 
-    setLoading(true);
+},[]);
 
-    const res=await fetch("/api/analyze",{ method:"POST" });
+/* ---------- TYPEWRITER ---------- */
 
-    setData(await res.json());
-    setLoading(false);
+useEffect(()=>{
 
-  };
+if(!data?.name) return;
 
-  const deepScan=async(niche:string,index:number)=>{
+let i=0;
+setTypedText("");
 
-    setSelected(index);
-    setDeepData(null);
+const interval=setInterval(()=>{
 
-    const res=await fetch("/api/analyze",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ deep:true,niche })
-    });
+setTypedText(prev=>prev+data.name[i]);
+i++;
 
-    setDeepData(await res.json());
+if(i>=data.name.length) clearInterval(interval);
 
-  };
+},25);
 
-  return(
+return ()=>clearInterval(interval);
 
-    <main className="min-h-screen bg-black text-white p-6">
+},[data]);
 
-      <h1 className="text-3xl text-center">⚫ Oracle X</h1>
+/* ---------- SCAN ANIMATION ---------- */
 
-      <textarea value={idea} onChange={(e)=>setIdea(e.target.value)} />
+const scanMessages=[
+"Oracle X scanning live signals...",
+"Tracking buyer intent...",
+"Detecting hidden opportunities...",
+"Calculating monetization..."
+];
 
-      <button onClick={analyze}>Analyze Idea</button>
+const runScanAnimation=()=>{
 
-      <button onClick={radar}>Scan Emerging Niches</button>
+let i=0;
 
-      {loading && <p>Scanning...</p>}
+const interval=setInterval(()=>{
 
-      {data?.mode==="radar" && data.niches.map((n:any,i:number)=>(
+setScanStep(scanMessages[i]);
+i++;
 
-        <div key={i} onClick={()=>deepScan(n.name,i)}>
+if(i>=scanMessages.length) clearInterval(interval);
 
-          <h2>{n.name}</h2>
+},600);
 
-          {selected===i && (
+};
 
-            <div>
+/* ---------- ANALYZE ---------- */
 
-              {!deepData && <p>Deep scanning...</p>}
+const analyze=async()=>{
 
-              {deepData && (
+if(!idea) return;
 
-                <>
-                  <p>Execution: {deepData.execution}</p>
-                  <p>Users: {deepData.users}</p>
-                  <p>Traffic: {deepData.traffic}</p>
-                  <p>Monetization: {deepData.monetization}</p>
-                </>
+setLoading(true);
+setReveal(false);
+setData(null);
 
-              )}
+runScanAnimation();
 
-            </div>
+const res=await fetch("/api/analyze",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ idea })
+});
 
-          )}
+const json=await res.json();
+setData(json);
 
-        </div>
+const newUses=uses+1;
+setUses(newUses);
+localStorage.setItem("oraclex_uses",String(newUses));
 
-      ))}
+setTimeout(()=>{
 
-    </main>
+setReveal(true);
+setLoading(false);
 
-  );
+},900);
+
+};
+
+/* ---------- RADAR ---------- */
+
+const radar=async()=>{
+
+setLoading(true);
+setReveal(false);
+setData(null);
+
+runScanAnimation();
+
+const res=await fetch("/api/analyze",{ method:"POST" });
+
+const json=await res.json();
+
+setData(json);
+
+setTimeout(()=>{
+
+setReveal(true);
+setLoading(false);
+
+},900);
+
+};
+
+/* ---------- DEEP SCAN ---------- */
+
+const deepScan=async(niche:string,index:number)=>{
+
+setSelected(index);
+setDeepData(null);
+
+const res=await fetch("/api/analyze",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ deep:true,niche })
+});
+
+setDeepData(await res.json());
+
+};
+
+/* ---------- PAYMENT ---------- */
+
+const unlockBlueprint=()=>{
+
+window.location.href="https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
+
+};
+
+const blueprintLocked=!unlocked && uses>=3;
+
+/* ---------- UI ---------- */
+
+return(
+
+<main className="min-h-screen bg-black text-white px-4 py-10 flex justify-center">
+
+<div className="max-w-xl w-full space-y-6">
+
+<h1 className="text-3xl font-bold text-center">⚫ Oracle X</h1>
+
+<p className="text-center text-xs opacity-60">
+{Math.max(0,3-uses)} free scans remaining
+</p>
+
+<textarea
+className="w-full p-4 bg-zinc-900 rounded-lg"
+placeholder="Describe your business idea..."
+value={idea}
+onChange={(e)=>setIdea(e.target.value)}
+/>
+
+<button onClick={analyze} className="w-full bg-white text-black py-3 rounded-lg">
+Analyze Idea
+</button>
+
+<button onClick={radar} className="w-full border py-3 rounded-lg">
+Scan Emerging Niches
+</button>
+
+{loading && (
+
+<div className="bg-zinc-900 p-6 rounded-xl animate-pulse">
+
+⚫ {scanStep}
+
+</div>
+
+)}
+
+{/* IDEA RESULT */}
+
+{(reveal && data?.mode==="idea") && (
+
+<div className="bg-zinc-900 p-6 rounded-xl space-y-4 border border-green-500/20">
+
+<h2 className="text-green-400">🔥 {typedText}</h2>
+
+<p>Opportunity Score: {data.score}/100</p>
+
+<div>
+
+<p>🔥 Success Probability: {data.success_probability}%</p>
+
+<div className="w-full h-3 bg-zinc-800 rounded">
+
+<div className="h-3 bg-green-500" style={{width:`${data.success_probability}%`}}/>
+
+</div>
+
+</div>
+
+{blueprintLocked ? (
+
+<div>
+
+<p className="opacity-60">🔒 Monetization Blueprint locked</p>
+
+<button onClick={unlockBlueprint}
+className="w-full bg-green-500 text-black py-3 rounded-lg">
+Unlock Revenue Plan ⚡
+</button>
+
+</div>
+
+):( 
+
+<div>
+
+<h3 className="text-green-400 font-semibold">💰 First Money Blueprint</h3>
+
+<p>{data.first_product}</p>
+<p>{data.price}</p>
+<p>{data.where_to_sell}</p>
+<p>{data.traffic_source}</p>
+
+</div>
+
+)}
+
+</div>
+
+)}
+
+{/* RADAR */}
+
+{(reveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
+
+<div key={i}
+onClick={()=>deepScan(n.name,i)}
+className="bg-zinc-900 p-6 rounded-xl cursor-pointer hover:bg-zinc-800">
+
+<h2 className="text-green-400">🔥 {n.name}</h2>
+
+<p>Score: {n.score}/100</p>
+
+<p>{n.why_trending}</p>
+
+{selected===i && (
+
+<div className="mt-4 border-t pt-4">
+
+{!deepData && <p>Oracle X deep scanning...</p>}
+
+{deepData && (
+
+<>
+<p>Execution: {deepData.execution}</p>
+<p>Users: {deepData.users}</p>
+<p>Traffic: {deepData.traffic}</p>
+<p>Monetization: {deepData.monetization}</p>
+</>
+
+)}
+
+</div>
+
+)}
+
+</div>
+
+))}
+
+</div>
+
+</main>
+
+);
 
 }
