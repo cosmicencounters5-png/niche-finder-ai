@@ -23,17 +23,13 @@ export default function Home(){
     const params = new URLSearchParams(window.location.search);
 
     if(params.get("unlock")==="true"){
-
       setUnlocked(true);
       localStorage.setItem("oraclex_unlock","true");
       window.history.replaceState({},document.title,"/");
-
     }
 
     if(localStorage.getItem("oraclex_unlock")==="true"){
-
       setUnlocked(true);
-
     }
 
   },[]);
@@ -136,31 +132,7 @@ export default function Home(){
 
   };
 
-  /* ---------- RADAR ---------- */
-
-  const radar=async()=>{
-
-    setLoading(true);
-    setReveal(false);
-    setShowBlueprint(false);
-    setData(null);
-
-    runScanAnimation();
-
-    const res=await fetch("/api/analyze",{ method:"POST" });
-
-    const json = await res.json();
-
-    setData(json);
-
-    setTimeout(()=>{
-      setReveal(true);
-      setLoading(false);
-    },900);
-
-  };
-
-  /* ---------- STRIPE PAYMENT ---------- */
+  /* ---------- STRIPE ---------- */
 
   const unlockBlueprint = () => {
 
@@ -168,17 +140,7 @@ export default function Home(){
 
   };
 
-  /* ---------- SHARE FUNCTIONS ---------- */
-
-  const shareText = () => {
-
-    const text = `Oracle X predicted a ${data.score}/100 opportunity with ${data.success_probability}% success probability. Found this early using Oracle X.`;
-
-    navigator.clipboard.writeText(text);
-
-    alert("Copied — share it 😈");
-
-  };
+  /* ---------- VIRAL SHARE ---------- */
 
   const shareTwitter = () => {
 
@@ -190,6 +152,30 @@ export default function Home(){
 
   };
 
+  /* ---------- REDDIT DOMINATION MODE ---------- */
+
+  const launchReddit = () => {
+
+    const title = encodeURIComponent(
+      `I built an AI that predicts profitable niches before they trend — got ${data.score}/100 score`
+    );
+
+    const body = encodeURIComponent(
+`Been experimenting with Oracle X — an AI that scans market signals and predicts early opportunities.
+
+My idea scored ${data.score}/100 with ${data.success_probability}% success probability.
+
+Curious what you think.
+
+👉 ${window.location.href}`
+    );
+
+    window.open(
+      `https://www.reddit.com/r/startups/submit?title=${title}&text=${body}`
+    );
+
+  };
+
   /* ---------- UI ---------- */
 
   return(
@@ -198,16 +184,12 @@ export default function Home(){
 
       <div className="max-w-xl w-full space-y-6">
 
-        <h1 className="text-3xl font-bold text-center tracking-wide">
+        <h1 className="text-3xl font-bold text-center">
           ⚫ Oracle X
         </h1>
 
-        <p className="text-center text-sm opacity-60">
-          Predict profitable opportunities before they trend.
-        </p>
-
         <textarea
-          className="w-full p-4 bg-zinc-900 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+          className="w-full p-4 bg-zinc-900 rounded-lg"
           placeholder="Describe your business idea..."
           value={idea}
           onChange={(e)=>setIdea(e.target.value)}
@@ -217,13 +199,9 @@ export default function Home(){
           Analyze Idea
         </button>
 
-        <button onClick={radar} className="w-full border py-3 rounded-lg">
-          Scan Emerging Niches
-        </button>
-
         {loading && (
 
-          <div className="bg-zinc-900 p-6 rounded-xl text-sm animate-pulse">
+          <div className="bg-zinc-900 p-6 rounded-xl animate-pulse">
             ⚫ {scanStep}
           </div>
 
@@ -233,7 +211,7 @@ export default function Home(){
 
           <div className="bg-zinc-900 p-6 rounded-xl space-y-4 border border-green-500/20">
 
-            <h2 className="text-xl text-green-400">🔥 {typedText}</h2>
+            <h2 className="text-green-400">🔥 {typedText}</h2>
 
             <p>Opportunity Score: {data.score}/100</p>
 
@@ -243,7 +221,7 @@ export default function Home(){
 
               unlocked ? (
 
-                <div className="border-t border-zinc-700 pt-4">
+                <div className="border-t pt-4">
 
                   <p><strong>Product:</strong> {data.first_product}</p>
                   <p><strong>Price:</strong> {data.price}</p>
@@ -254,35 +232,29 @@ export default function Home(){
 
               ) : (
 
-                <div className="border-t border-zinc-700 pt-4">
-
-                  <p>🔒 Monetization Blueprint locked</p>
-
-                  <button onClick={unlockBlueprint} className="w-full bg-green-500 text-black py-3 rounded-lg">
-                    Unlock Revenue Plan ⚡
-                  </button>
-
-                </div>
+                <button onClick={unlockBlueprint} className="w-full bg-green-500 text-black py-3 rounded-lg">
+                  Unlock Revenue Plan ⚡
+                </button>
 
               )
 
             )}
 
-            {/* 🔥 VIRAL SHARE */}
+            {/* 🔥 REDDIT VIRAL ENGINE */}
 
-            <div className="border-t border-zinc-700 pt-4 space-y-2">
+            <button
+              onClick={launchReddit}
+              className="w-full border py-3 rounded-lg hover:bg-zinc-800"
+            >
+              🚀 Launch this on Reddit
+            </button>
 
-              <p className="text-xs opacity-60">Share your prediction</p>
-
-              <button onClick={shareText} className="w-full border py-2 rounded-lg">
-                Copy Result
-              </button>
-
-              <button onClick={shareTwitter} className="w-full border py-2 rounded-lg">
-                Share on X
-              </button>
-
-            </div>
+            <button
+              onClick={shareTwitter}
+              className="w-full border py-3 rounded-lg hover:bg-zinc-800"
+            >
+              Share on X
+            </button>
 
           </div>
 
