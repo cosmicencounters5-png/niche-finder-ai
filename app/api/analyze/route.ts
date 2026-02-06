@@ -14,9 +14,7 @@ export async function POST(req: Request) {
     const deep = body.deep;
     const niche = body.niche;
 
-    /* ===============================
-       🔥 DEEP ORACLE
-    =============================== */
+    /* ---------- DEEP ORACLE ---------- */
 
     if(deep){
 
@@ -29,13 +27,13 @@ export async function POST(req: Request) {
           role:"user",
           content:`
 
-You are ORACLE X DEEP MARKET ANALYZER.
+You are Oracle X Deep Analyzer.
 
 Niche:
 
 ${niche}
 
-Return STRICT JSON:
+Return JSON:
 
 {
  "execution":"",
@@ -57,44 +55,38 @@ Return STRICT JSON:
 
     }
 
-    /* ===============================
-       🔥 ORACLE X MAIN ENGINE
-    =============================== */
+    /* ---------- MAIN ORACLE ---------- */
 
     const prompt = idea
       ? `
-You are ORACLE X.
-
-You identify HIGHLY profitable opportunities.
+You are Oracle X addictive business analyzer.
 
 User idea:
 
 ${idea}
 
+Return MULTIPLE opportunities.
+
 Return STRICT JSON:
 
 {
  "mode":"idea",
+
  "name":"",
+
  "score":85,
  "success_probability":70,
 
+ "alternative_angles":[
+   { "name":"", "difficulty":"low/medium/high" },
+   { "name":"", "difficulty":"low/medium/high" },
+   { "name":"", "difficulty":"low/medium/high" }
+ ],
+
  "hot_products":[
-   {
-     "name":"",
-     "why_hot":"",
-     "difficulty":"low/medium/high"
-   },
-   {
-     "name":"",
-     "why_hot":"",
-     "difficulty":"low/medium/high"
-   },
-   {
-     "name":"",
-     "why_hot":"",
-     "difficulty":"low/medium/high"
-   }
+   { "name":"", "why_hot":"" },
+   { "name":"", "why_hot":"" },
+   { "name":"", "why_hot":"" }
  ],
 
  "first_product":"",
@@ -102,16 +94,13 @@ Return STRICT JSON:
  "where_to_sell":"",
  "traffic_source":""
 }
-
 `
       : `
-You are ORACLE X TREND RADAR.
+You are Oracle X Trend Radar.
 
-Return EXACTLY 6 HIGHLY DIFFERENT emerging niches.
+Return EXACTLY 6 VERY DIFFERENT niches.
 
-Each niche must target a DIFFERENT audience or problem.
-
-Return STRICT JSON:
+Return JSON:
 
 {
  "mode":"radar",
@@ -145,9 +134,7 @@ Return STRICT JSON:
 
     console.log("ORACLE ERROR:", err);
 
-    return Response.json({
-      error:"oracle failed"
-    });
+    return Response.json({ error:"oracle failed" });
 
   }
 
