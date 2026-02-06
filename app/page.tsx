@@ -262,11 +262,33 @@ style={{width:`${data.success_probability}%`}}/>
 </div>
 </div>
 
+{/* 🔥 FULL EXECUTION EXPANSION */}
+
 {data.alternative_angles?.map((a:any,i:number)=>(
 
-<div key={i} className="bg-black/40 p-3 rounded">
-<p className="text-green-400">{a.name}</p>
-<p className="text-xs opacity-60">Difficulty: {a.difficulty}</p>
+<div key={i} className="bg-black/40 p-4 rounded space-y-2">
+
+<p className="text-green-400 font-semibold">
+🔥 {a.name}
+</p>
+
+<p className="text-xs opacity-60">
+Difficulty: {a.difficulty}
+</p>
+
+<div className="text-sm opacity-80 space-y-1">
+
+<p>⚡ Day 1: {a.execution_plan?.day1}</p>
+<p>🚀 Week 1: {a.execution_plan?.week1}</p>
+<p>💰 First Money: {a.execution_plan?.first_money}</p>
+<p>🔥 Growth Lever: {a.execution_plan?.growth_lever}</p>
+
+</div>
+
+<p className="text-xs text-green-300">
+Hidden opportunity: {a.hidden_opportunity}
+</p>
+
 </div>
 
 ))}
