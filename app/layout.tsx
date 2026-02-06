@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Oracle Evolution X",
@@ -17,7 +17,7 @@ export default function RootLayout({
 
       <body className="bg-black text-white antialiased">
 
-        {/* Background glow (elite aesthetic) */}
+        {/* Background glow */}
         <div className="fixed inset-0 -z-10">
 
           <div className="absolute inset-0 bg-black" />
@@ -26,13 +26,15 @@ export default function RootLayout({
 
         </div>
 
-        {/* Main app */}
         <div className="relative z-10">
           {children}
         </div>
 
-        {/* 🔥 VERCEL ANALYTICS (LIVE VISITOR TRACKING) */}
-        <Analytics />
+        {/* 🔥 VERCEL ANALYTICS (NO INSTALL REQUIRED) */}
+        <Script
+          src="https://va.vercel-scripts.com/v1/script.js"
+          strategy="afterInteractive"
+        />
 
       </body>
 
