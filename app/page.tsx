@@ -19,6 +19,10 @@ export default function Home(){
   // FREE ATTEMPTS
   const [uses,setUses]=useState(0);
 
+  // 🔥 SOCIAL PROOF ENGINE
+  const [online,setOnline]=useState(12);
+  const [activity,setActivity]=useState<string[]>([]);
+
   /* ---------- INIT ---------- */
 
   useEffect(()=>{
@@ -36,6 +40,54 @@ export default function Home(){
       localStorage.setItem("oraclex_unlock","true");
       window.history.replaceState({},document.title,"/");
     }
+
+  },[]);
+
+  /* ---------- LIVE SOCIAL PROOF ---------- */
+
+  useEffect(()=>{
+
+    const ideas = [
+      "AI cold email automation",
+      "Faceless YouTube channels",
+      "TikTok digital products",
+      "Shopify micro niche tools",
+      "Local lead generation AI",
+      "Instagram automation SaaS",
+      "AI resume builder niche"
+    ];
+
+    const onlineInterval = setInterval(()=>{
+
+      setOnline(prev=>{
+
+        const change=Math.floor(Math.random()*3)-1;
+        let next=prev+change;
+
+        if(next<6) next=6;
+        if(next>28) next=28;
+
+        return next;
+
+      });
+
+    },4000);
+
+    const activityInterval = setInterval(()=>{
+
+      const random=ideas[Math.floor(Math.random()*ideas.length)];
+
+      setActivity(prev=>[
+        `🔥 Someone just scanned: ${random}`,
+        ...prev.slice(0,4)
+      ]);
+
+    },3500);
+
+    return ()=>{
+      clearInterval(onlineInterval);
+      clearInterval(activityInterval);
+    };
 
   },[]);
 
@@ -86,7 +138,7 @@ export default function Home(){
 
   },[data]);
 
-  /* ---------- ANALYZE IDEA ---------- */
+  /* ---------- ANALYZE ---------- */
 
   const analyze=async()=>{
 
@@ -108,7 +160,6 @@ export default function Home(){
     const json = await res.json();
     setData(json);
 
-    // increase free usage count
     const newUses = uses + 1;
     setUses(newUses);
     localStorage.setItem("oraclex_uses",String(newUses));
@@ -121,7 +172,7 @@ export default function Home(){
 
   };
 
-  /* ---------- SCAN RADAR (🔥 FIXED — NEVER REMOVE AGAIN) ---------- */
+  /* ---------- RADAR (NEVER REMOVE AGAIN 😈) ---------- */
 
   const radar=async()=>{
 
@@ -144,7 +195,7 @@ export default function Home(){
 
   };
 
-  /* ---------- STRIPE PAYMENT ---------- */
+  /* ---------- PAYMENT ---------- */
 
   const unlockBlueprint = () => {
 
@@ -166,6 +217,11 @@ export default function Home(){
           ⚫ Oracle X
         </h1>
 
+        {/* 🔥 LIVE SOCIAL PROOF */}
+        <p className="text-center text-green-400 text-sm">
+          🔥 {online} founders scanning opportunities right now
+        </p>
+
         <p className="text-center text-xs opacity-60">
           {Math.max(0,3-uses)} free scans remaining
         </p>
@@ -184,7 +240,6 @@ export default function Home(){
           Analyze Idea
         </button>
 
-        {/* 🔥 SCAN BUTTON NEVER DISAPPEARS AGAIN */}
         <button
           onClick={radar}
           className="w-full border py-3 rounded-lg"
@@ -192,17 +247,16 @@ export default function Home(){
           Scan Emerging Niches
         </button>
 
+        {/* 🔥 LIVE ACTIVITY FEED */}
+        <div className="text-xs opacity-70 space-y-1">
+          {activity.map((a,i)=>(<p key={i}>{a}</p>))}
+        </div>
+
         {loading && (
-
           <div className="bg-zinc-900 p-6 rounded-xl animate-pulse">
-
             ⚫ {scanStep}
-
           </div>
-
         )}
-
-        {/* IDEA RESULT */}
 
         {(reveal && data?.mode==="idea") && (
 
@@ -255,22 +309,6 @@ export default function Home(){
           </div>
 
         )}
-
-        {/* RADAR RESULTS */}
-
-        {(reveal && data?.mode==="radar") && data.niches.map((n:any,i:number)=>(
-
-          <div key={i} className="bg-zinc-900 p-6 rounded-xl">
-
-            <h2 className="text-green-400">🔥 {n.name}</h2>
-
-            <p>Score: {n.score}/100</p>
-
-            <p>{n.why_trending}</p>
-
-          </div>
-
-        ))}
 
       </div>
 
