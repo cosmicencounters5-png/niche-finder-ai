@@ -148,7 +148,7 @@ export default function Home(){
   const unlockBlueprint = () => {
 
     // 🔥 REPLACE WITH YOUR STRIPE PAYMENT LINK
-    window.location.href = "PASTE_STRIPE_PAYMENT_LINK_HERE";
+    window.location.href = "https://buy.stripe.com/cNi6oAga10QI2Z3fVg8k802";
 
   };
 
